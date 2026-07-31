@@ -515,3 +515,8 @@ button:active { transform: translateY(1px); }
 
 /* Prominent results-page disclaimer (global last-checked + university-level caveat) */
 .results-disclaimer{border-left:4px solid #b8860b;background:rgba(184,134,11,.10);padding:.7rem .9rem;border-radius:6px;margin:0 0 .8rem;line-height:1.45}
+
+/* Qualification subject validation */
+.al-subject-error{color:#c0392b;font-size:.82rem;margin:.3rem 0 0;line-height:1.35}
+.al-subject[aria-invalid="true"]{border-color:#c0392b}
+.subj-suggest{background:none;border:0;padding:0;color:var(--brand);font:inherit;text-decoration:underline;cursor:pointer}
