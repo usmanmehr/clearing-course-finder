@@ -505,10 +505,22 @@ async function onSubmit(e) {
 }
 
 // ---- Freshness stat (hero banner) ----
-// Shows the ACTUAL most recent automated check across all tracked universities,
-// not a raw "N drifts detected" count. Falls back to the static "Hourly" label
-// already in the HTML if this fails - never blocks or breaks the page.
+// Shows the ACTUAL most recent automated check across all tracked universities.
+// Before any check data is available it shows the current automated cadence,
+// which matches the deployed EventBridge Scheduler phases (kept in sync with
+// terraform/modules/scraper-schedule). Never blocks or breaks the page.
+function scrapeCadenceLabel() {
+  const now = Date.now();
+  const t = (s) => new Date(s).getTime();
+  if (now < t('2026-08-11T23:00:00Z')) return 'Every 30 min';
+  if (now < t('2026-08-13T23:00:00Z')) return 'Every 10 min';
+  if (now < t('2026-08-31T23:00:00Z')) return '4x a day';
+  return 'Seasonal'; // paused outside the Clearing window
+}
+
 async function updateFreshnessStat() {
+  // Default to the current automated cadence (accurate even before data loads).
+  el('freshness-value').textContent = scrapeCadenceLabel();
   try {
     const res = await fetch(`${API}/universities`, { cache: 'no-store' });
     if (!res.ok) return;
@@ -522,7 +534,7 @@ async function updateFreshnessStat() {
     const mostRecent = new Date(Math.max(...timestamps)).toISOString();
     const ago = timeAgo(mostRecent);
     if (ago) el('freshness-value').textContent = `Checked ${ago}`;
-  } catch { /* keep the static "Hourly" fallback already in the HTML */ }
+  } catch { /* keep the cadence label set above */ }
 }
 
 // ---- Init ----
