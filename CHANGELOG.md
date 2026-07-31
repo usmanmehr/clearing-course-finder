@@ -15,6 +15,9 @@ All notable changes to this project are documented in this file.
 - Homepage freshness stat now reflects the real automated cadence (and the
   actual "checked N ago" time where available), replacing a static "Hourly"
   claim that no longer matched the schedule.
+- Scraper schedules now have a retry policy (3 attempts) and a dedicated SQS
+  dead-letter queue, so an undeliverable scheduled trigger is retried and then
+  captured rather than silently lost.
 
 ## [0.1.0] - Initial release
 
