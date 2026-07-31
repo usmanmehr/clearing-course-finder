@@ -151,6 +151,7 @@ resource "aws_lambda_alias" "search_courses_live" {
 
 output "search_courses_alias_arn" { value = aws_lambda_alias.search_courses_live.arn }
 output "lambda_invoke_arns" { value = { for k, f in aws_lambda_function.fn : k => f.invoke_arn } }
+output "dailyscraper_arn" { value = aws_lambda_function.fn["DailyScraper"].arn }
 output "origin_secret_arn" { value = aws_secretsmanager_secret.origin_secret.arn }
 output "origin_secret_value" {
   value     = random_password.origin_secret.result
