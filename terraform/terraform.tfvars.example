@@ -1,0 +1,19 @@
+# Copy to terraform.tfvars and fill in. terraform.tfvars is git-ignored.
+
+aws_region  = "eu-west-2"
+name_prefix = "uk-clearing-advisor-2027"
+
+# Core only by default. Set true to add observability/scaling/grafana.
+enable_full = false
+
+# Graviton by default (IMPROVEMENTS-2027 item 7).
+lambda_architecture = "arm64"
+
+# WAF Core Rule Set: false = Block (default), true = Count soak only.
+waf_crs_count_mode = false
+
+# --- Required only when enable_full = true ---
+# admin_email          = "you@example.com"
+# grafana_vpc_id       = "vpc-xxxxxxxx"
+# grafana_subnet_id    = "subnet-xxxxxxxx"
+# grafana_allowed_cidr = "203.0.113.4/32"   # never 0.0.0.0/0

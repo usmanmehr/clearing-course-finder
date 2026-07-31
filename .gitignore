@@ -1,0 +1,24 @@
+# Terraform state + local values (contain secrets/account specifics) - never commit.
+**/*.tfstate
+**/*.tfstate.*
+**/.terraform/
+**/.terraform.lock.hcl
+terraform/terraform.tfvars
+**/*.auto.tfvars
+
+# Build artifacts
+build/
+
+# Historical 2026 CloudFormation reference (may contain account ARNs / secret refs).
+reference/
+
+# Live deployment snapshot - contains real account id / domain / IPs (operational, local only).
+DEPLOYMENT-STATUS.md
+
+# Misc
+*.log
+.DS_Store
+
+# Python bytecode
+__pycache__/
+*.pyc

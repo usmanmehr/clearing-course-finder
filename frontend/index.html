@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Find undergraduate courses in UCAS Clearing 2027 across UK universities, ranked by graduate employability and salary.">
+  <meta name="theme-color" content="#0d1b3e">
+
+  <title>UK Clearing Advisor - Find your course in Clearing 2027</title>
+
+  <!-- Open Graph + Twitter Card control how the link looks when shared. These
+       are static preview hints read by the platform doing the preview - no
+       tracking, no script, no cookie. The canonical and og:url are set once
+       the 2027 CloudFront domain is known (this stack is not yet deployed),
+       so they are intentionally omitted here rather than pointing at the
+       2026 domain. -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="UK Clearing Advisor - Find your course in Clearing 2027">
+  <meta property="og:description" content="Free tool to find undergraduate courses in UCAS Clearing 2027, ranked by graduate employability and salary. No sign-up, not for profit.">
+  <meta property="og:locale" content="en_GB">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="UK Clearing Advisor - Find your course in Clearing 2027">
+  <meta name="twitter:description" content="Free tool to find undergraduate courses in UCAS Clearing 2027, ranked by graduate employability and salary. No sign-up, not for profit.">
+
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#form-heading">Skip to search</a>
+
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true">UC</span>
+        <span class="brand-name">UK Clearing Advisor</span>
+      </a>
+      <nav class="header-nav" aria-label="Primary">
+        <a href="/faq.html" class="nav-link">FAQ</a>
+        <span class="pill">Clearing 2027</span>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="wrap hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow">UCAS Clearing 2027</p>
+        <h1>Find the right course in Clearing</h1>
+        <p class="lede">
+          Enter your A-levels or BTECs and what you want to study. We rank
+          undergraduate courses across UK universities by graduate
+          employability and salary, in seconds.
+        </p>
+        <ul class="hero-points">
+          <li>Works with A-levels, BTECs, or a mix of both</li>
+          <li>Ranked by graduate outcomes and value for money</li>
+          <li>Clearing hotlines and pages for every match</li>
+          <li>No sign-up required</li>
+        </ul>
+      </div>
+      <dl class="hero-stats" aria-label="At a glance">
+        <div><dt>44</dt><dd>universities tracked</dd></div>
+        <div><dt>46</dt><dd>subject areas</dd></div>
+        <div><dt>&lt;1s</dt><dd>typical results time</dd></div>
+        <div id="freshness-stat"><dt id="freshness-value">Hourly</dt><dd>clearing pages checked automatically</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <main class="wrap main-grid" id="main">
+    <section aria-labelledby="form-heading" class="card form-card">
+      <h2 id="form-heading">Tell us about you</h2>
+      <form id="search-form" novalidate>
+        <div class="field">
+          <label for="course-interest">What do you want to study?</label>
+          <input type="text" id="course-interest" name="courseInterest"
+                 list="subject-list" autocomplete="off"
+                 placeholder="For example, Economics" aria-describedby="ci-help">
+          <datalist id="subject-list"></datalist>
+          <p id="ci-help" class="help">Free text. Leave blank to see the strongest universities across all subjects.</p>
+          <p id="did-you-mean" class="did-you-mean" role="status" aria-live="polite" hidden></p>
+        </div>
+
+        <fieldset>
+          <legend>Your qualifications</legend>
+          <p class="help">A-levels, BTECs, or a mix of both.</p>
+          <div id="alevels"></div>
+          <button type="button" id="add-alevel" class="secondary small">Add another qualification</button>
+        </fieldset>
+
+        <div class="grid">
+          <div class="field">
+            <label for="priority">Sort by</label>
+            <select id="priority" name="priority">
+              <option value="balanced">Balanced</option>
+              <option value="salary">Graduate salary</option>
+              <option value="employability">Employability</option>
+              <option value="ranking">University ranking</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="location">Location</label>
+            <select id="location" name="location">
+              <option value="any">Anywhere in the UK</option>
+              <option value="england">England</option>
+              <option value="scotland">Scotland</option>
+              <option value="wales">Wales</option>
+              <option value="ni">Northern Ireland</option>
+              <option value="london">London</option>
+            </select>
+          </div>
+          <div class="field checkbox">
+            <input type="checkbox" id="russellGroupOnly" name="russellGroupOnly">
+            <label for="russellGroupOnly">Russell Group only</label>
+          </div>
+        </div>
+
+        <!-- Honeypot: hidden from humans, must stay empty. -->
+        <input type="text" name="website" id="website" class="honeypot" autocomplete="off"
+               tabindex="-1" aria-hidden="true">
+
+        <button type="submit" id="submit-btn" disabled>Find courses</button>
+      </form>
+    </section>
+
+    <aside class="side">
+      <div class="card info-card">
+        <h2 class="h3">How it works</h2>
+        <ol class="steps">
+          <li><span aria-hidden="true">1</span> Add your qualifications and subject interest.</li>
+          <li><span aria-hidden="true">2</span> We match courses you can realistically get.</li>
+          <li><span aria-hidden="true">3</span> Call the clearing hotline and secure your place.</li>
+        </ol>
+      </div>
+      <div class="card note-card">
+        <h2 class="h3">What's exact vs estimated</h2>
+        <p><strong>Exact:</strong> your UCAS Tariff points. We convert your
+          A-level and BTEC grades using the official published UCAS Tariff
+          tables - the same points a university admissions system uses.</p>
+        <p><strong>Estimated:</strong> everything about course availability.
+          "Typical offer" bands, and whether a course is open, are based on
+          each university's overall tier and Clearing status, not this
+          year's live vacancy data for the specific course - a real UCAS
+          Clearing feed for that doesn't exist here yet. Always confirm
+          directly with the university before relying on it.</p>
+        <p>Salary is the national median for the subject (HESA Graduate
+          Outcomes 2022/23), not a university-specific figure. Graduate
+          prospects, where shown, are from the Complete University Guide 2027.
+          Live vacancies are confirmed by phone on Results Day in August 2027.</p>
+        <p><a href="/faq.html#grades" class="text-link">Read the full FAQ on how grades are worked out</a></p>
+      </div>
+    </aside>
+
+    <section aria-labelledby="results-heading" class="card results-card" id="results-section" hidden>
+      <h2 id="results-heading">Results</h2>
+      <p id="salary-banner" class="salary-banner" hidden></p>
+      <div id="results-summary" role="status" aria-live="polite"></div>
+      <div id="results" class="results"></div>
+      <button type="button" id="show-more" class="secondary" hidden>Show more</button>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap footer-inner">
+      <p class="footer-brand"><strong>UK Clearing Advisor</strong></p>
+      <p class="disclaimer">
+        Salary figures are national subject medians from HESA Graduate Outcomes
+        2022/23 and are not university-specific. Graduate prospects, where
+        shown, are from the Complete University Guide 2027. Offers are
+        indicative. This service is available in the United Kingdom only.
+        <a href="/faq.html" class="text-link">Read the FAQ</a>.
+      </p>
+      <p class="legal-notice">
+        This is an independent, non-commercial project built as a genuine
+        effort to help students navigate UCAS Clearing. No responsibility is
+        accepted for the accuracy of any information shown - always verify
+        course availability and offers directly with UCAS and the university
+        before relying on it. No fee or profit is made from this service.
+      </p>
+    </div>
+  </footer>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>
