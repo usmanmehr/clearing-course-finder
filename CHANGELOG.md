@@ -22,6 +22,9 @@ All notable changes to this project are documented in this file.
   the per-card status note; consolidated them into a single prominent disclaimer
   at the top showing one global "last checked" time plus the caveat that status
   is university-level (not course-level) and must be confirmed with the university.
+- Hero banner made more compact: condensed the headline, lede, and the four
+  selling points (all four kept), with reduced font sizes, spacing, and padding
+  so it no longer dominates the page. Colour scheme unchanged.
 
 ## [0.1.0] - Initial release
 
