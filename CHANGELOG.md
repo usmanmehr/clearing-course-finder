@@ -2,6 +2,17 @@
 
 All notable changes to this project are documented in this file.
 
+## [Unreleased]
+
+### Added
+- Phased scraper schedule (EventBridge Scheduler) that triggers the
+  clearing-page checker, replacing the previously unscheduled function:
+  - up to 11 Aug: every 30 minutes
+  - 12-13 Aug (peak Clearing days): every 10 minutes
+  - 14-31 Aug: four times per day
+  - 1 Sep onwards: paused until the next cycle
+  Implemented as time-bounded schedules; the scraper logic is unchanged.
+
 ## [0.1.0] - Initial release
 
 ### Added
