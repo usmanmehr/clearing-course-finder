@@ -279,10 +279,9 @@ function courseCard(c) {
   const driftWarn = c.possibleStatusChange
     ? '<div class="warn">Automated check flagged a possible change to this page - status above may be out of date. Confirm directly.</div>'
     : '';
-  const checkedAgo = timeAgo(c.lastAutomatedCheck);
-  const freshnessLine = checkedAgo
-    ? `<div class="freshness-line${c.possibleStatusChange ? ' stale' : ''}">Clearing page checked ${escapeHtml(checkedAgo)}</div>`
-    : '';
+
+  // Per-card "checked X ago" and the university-level status caveat have moved
+  // to a single disclaimer at the top of the results page.
 
   // Only show figures that are verified. Graduate prospects are per-university
   // (CUG 2027) where published and DO vary by university, so they stay on
@@ -318,8 +317,6 @@ function courseCard(c) {
     ${sourceLine}
     ${warn}
     ${driftWarn}
-    ${freshnessLine}
-    ${c.statusNote ? `<div class="note-line">${escapeHtml(c.statusNote)}</div>` : ''}
     <div class="contact">Clearing: ${phone} ${page ? '\u00b7 ' + page : ''}
       ${c.hotlineOpens ? `<br>Hotline: ${escapeHtml(c.hotlineOpens)}` : ''}</div>
     ${pageWarn}
@@ -484,8 +481,23 @@ async function onSubmit(e) {
     const tariffLine = data.userTariffPoints != null
       ? `<div class="tariff-line">Your entry profile: <strong>${profile}${escapeHtml(data.userTariffPoints)} UCAS points</strong> (from the grades you entered - see <a href="/faq.html#grades" class="text-link">how this is calculated</a>).</div>`
       : '';
+
+    // Single prominent disclaimer: one global "last checked" time (the most
+    // recent automated check across the shown results) plus the university-level
+    // status caveat. Replaces the per-card timestamp and per-card status note.
+    const checkTimes = lastResults
+      .map((c) => c.lastAutomatedCheck).filter(Boolean)
+      .map((t) => new Date(t).getTime()).filter((t) => !Number.isNaN(t));
+    const lastChecked = checkTimes.length ? timeAgo(new Date(Math.max(...checkTimes)).toISOString()) : null;
+    const disclaimer = `<div class="results-disclaimer" role="note">`
+      + `<strong>Clearing status last checked: ${lastChecked ? escapeHtml(lastChecked) : 'not yet checked'}.</strong> `
+      + `The status shown reflects each university's overall Clearing availability, not this specific course. `
+      + `Always confirm directly with the university before relying on it.`
+      + `</div>`;
+
     el('results-summary').innerHTML =
-      tariffLine
+      disclaimer
+      + tariffLine
       + `Found ${escapeHtml(data.totalMatches)} courses in ${escapeHtml(secs)} seconds. `
       + `Showing the top ${escapeHtml(Math.min(PAGE, lastResults.length))}. Data last updated: ${escapeHtml(freshness)}.`;
     renderMore();
