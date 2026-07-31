@@ -95,6 +95,13 @@ module "dashboard" {
   metrics_namespace = "${local.metrics_namespace}/Canary"
 }
 
+# Phased scraper schedule (EventBridge Scheduler) - triggers DailyScraper.
+module "scraper_schedule" {
+  source            = "./modules/scraper-schedule"
+  name_prefix       = var.name_prefix
+  target_lambda_arn = module.compute.dailyscraper_arn
+}
+
 module "canary" {
   source = "./modules/canary"
   count  = local.canary_count
