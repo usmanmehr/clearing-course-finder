@@ -1,0 +1,52 @@
+digraph clearing_course_finder {
+  rankdir=TB;
+  bgcolor="white";
+  fontname="Helvetica"; labelloc="t"; fontsize=20;
+  label="Clearing Course Finder - Serverless Architecture";
+  node [fontname="Helvetica", fontsize=11, style="filled", shape="box", penwidth=1.2];
+  edge [fontname="Helvetica", fontsize=9, color="#555555"];
+
+  user [label="UK student browser", shape="oval", fillcolor="#e8eefc", color="#3355aa"];
+
+  /* us-east-1 edge security */
+  subgraph cluster_use1 {
+    label="us-east-1 (global edge scope)"; style="rounded,filled"; fillcolor="#fbeeee"; color="#aa5555"; fontcolor="#aa5555";
+    waf  [label="AWS WAF WebACL\nGB geo-restriction,\nrate limit, managed rules", fillcolor="#f7d9d9", color="#aa5555"];
+    acm  [label="ACM certificate\n(custom domain)", fillcolor="#f7d9d9", color="#aa5555"];
+  }
+
+  cf   [label="CloudFront distribution\n(+ optional custom domain)", fillcolor="#fff2cc", color="#bb9922"];
+
+  /* primary region */
+  subgraph cluster_primary {
+    label="Primary region (e.g. eu-west-1)"; style="rounded,filled"; fillcolor="#eef6ee"; color="#4c8c4a"; fontcolor="#357a33";
+    s3   [label="S3 static site\n(private, OAC)", shape="folder", fillcolor="#dff0df", color="#4c8c4a"];
+    api  [label="HTTP API Gateway", fillcolor="#dff0df", color="#4c8c4a"];
+    lam  [label="Lambda functions\nNode.js 22 - arm64\n(+ live alias, SQS DLQ)", fillcolor="#dff0df", color="#4c8c4a"];
+    ddb  [label="DynamoDB\nreference tables + TTL caches", shape="cylinder", fillcolor="#dff0df", color="#4c8c4a"];
+    sm   [label="Secrets Manager\norigin-verify secret", fillcolor="#dff0df", color="#4c8c4a"];
+    scr  [label="DailyScraper Lambda\n(EventBridge schedule)", fillcolor="#dff0df", color="#4c8c4a"];
+    dash [label="CloudWatch\noverview dashboard", fillcolor="#dff0df", color="#4c8c4a"];
+  }
+
+  /* second region - canary */
+  subgraph cluster_canary {
+    label="Second region (e.g. eu-west-2)"; style="rounded,filled"; fillcolor="#eef0f6"; color="#5566aa"; fontcolor="#445599";
+    canary [label="Canary EC2 t3.micro\nEIP allowlisted in WAF\nend-to-end checks / 60s", fillcolor="#e2e6f4", color="#5566aa"];
+    cw     [label="CloudWatch metrics\n+ alarm (4xx/5xx)", fillcolor="#e2e6f4", color="#5566aa"];
+    sns    [label="SNS -> email alert", fillcolor="#e2e6f4", color="#5566aa"];
+  }
+
+  user -> cf [label="HTTPS (UK only)"];
+  waf  -> cf [label="attached", style="dashed", dir="none", color="#aa5555"];
+  acm  -> cf [label="TLS cert", style="dashed", dir="none", color="#aa5555"];
+  cf -> s3  [label="/*  (static site)"];
+  cf -> api [label="/api/*  + X-Origin-Verify"];
+  api -> lam;
+  lam -> ddb;
+  lam -> sm  [label="read secret", style="dashed"];
+  scr -> ddb [label="daily refresh"];
+  canary -> cf [label="every 60s"];
+  canary -> cw;
+  cw -> sns;
+}
