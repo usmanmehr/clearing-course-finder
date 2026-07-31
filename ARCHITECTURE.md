@@ -6,6 +6,10 @@ destroy it, and the operational controls.
 
 ## Architecture diagram
 
+![Architecture diagram](architecture.png)
+
+<details><summary>Mermaid source (renders on GitHub)</summary>
+
 ```mermaid
 flowchart TB
   user([UK student browser]):::ext -->|HTTPS| cf[CloudFront distribution<br/>+ optional custom domain]
@@ -29,6 +33,8 @@ flowchart TB
   classDef ext fill:#eef,stroke:#557;
   classDef sec fill:#fee,stroke:#a55;
 ```
+
+</details>
 
 ## Regions
 
