@@ -157,7 +157,8 @@ function addAlevelRow(subject = '', grade = 'A', type = 'alevel') {
      </div>
      <div class="field">
        <label for="subj-${idx}">Subject</label>
-       <input type="text" id="subj-${idx}" class="al-subject" list="subject-list" value="${escapeHtml(subject)}" autocomplete="off">
+       <input type="text" id="subj-${idx}" class="al-subject" list="subject-list" value="${escapeHtml(subject)}" autocomplete="off" aria-describedby="subj-err-${idx}">
+       <p class="al-subject-error" id="subj-err-${idx}" role="alert" hidden></p>
      </div>
      <div class="field">
        <label for="grade-${idx}">Grade</label>
@@ -177,6 +178,10 @@ function addAlevelRow(subject = '', grade = 'A', type = 'alevel') {
     validateForm();
   });
   row.querySelectorAll('input,select').forEach((i) => i.addEventListener('input', validateForm));
+  const subjInput = row.querySelector('.al-subject');
+  subjInput.addEventListener('input', () => validateSubjectField(row));
+  subjInput.addEventListener('blur', () => validateSubjectField(row));
+  if (subject) validateSubjectField(row);
   rows.appendChild(row);
   validateForm();
 }
@@ -197,8 +202,67 @@ function totalSlots(entries) {
   return entries.reduce((sum, s) => sum + (QUALIFICATION_SLOTS[s.type] || 1), 0);
 }
 
+// Match a typed subject against the predefined valid-subject list (subjectNames,
+// loaded once from /api/subjects). Returns:
+//   {status:'empty'}                      - blank field, ignored
+//   {status:'ok', canonical}              - exact (case-insensitive) match
+//   {status:'suggest', suggestion}        - close typo; nearest valid subject
+//   {status:'unknown'}                    - not recognised
+// If the list has not loaded yet we don't block (defensive).
+function matchSubject(value) {
+  const v = (value || '').trim();
+  if (!v) return { status: 'empty' };
+  if (!subjectNames.length) return { status: 'ok', canonical: v };
+  const lower = v.toLowerCase();
+  const exact = subjectNames.find((s) => s.toLowerCase() === lower);
+  if (exact) return { status: 'ok', canonical: exact };
+  let best = null;
+  let bestD = Infinity;
+  for (const s of subjectNames) {
+    const d = levenshtein(lower, s.toLowerCase());
+    if (d < bestD) { bestD = d; best = s; }
+  }
+  const threshold = Math.max(2, Math.floor(lower.length * 0.34));
+  if (best && bestD <= threshold) return { status: 'suggest', suggestion: best };
+  return { status: 'unknown' };
+}
+
+// Render the inline error/suggestion for one qualification row's subject field.
+function validateSubjectField(row) {
+  const input = row.querySelector('.al-subject');
+  const err = row.querySelector('.al-subject-error');
+  if (!input || !err) return true;
+  const m = matchSubject(input.value);
+  if (m.status === 'ok' || m.status === 'empty') {
+    input.removeAttribute('aria-invalid');
+    err.hidden = true;
+    err.textContent = '';
+    return true;
+  }
+  input.setAttribute('aria-invalid', 'true');
+  err.hidden = false;
+  if (m.status === 'suggest') {
+    err.innerHTML = `Not a recognised subject. Did you mean <button type="button" class="subj-suggest">${escapeHtml(m.suggestion)}</button>?`;
+    const btn = err.querySelector('.subj-suggest');
+    btn.addEventListener('click', () => {
+      input.value = m.suggestion;
+      validateSubjectField(row);
+      validateForm();
+      input.focus();
+    });
+  } else {
+    err.textContent = 'Not a recognised subject - pick one from the list.';
+  }
+  return false;
+}
+
+function subjectsAllValid() {
+  return collectAlevels().every((s) => matchSubject(s.subject).status === 'ok');
+}
+
 function validateForm() {
-  el('submit-btn').disabled = totalSlots(collectAlevels()) < 2;
+  const enoughSlots = totalSlots(collectAlevels()) >= 2;
+  el('submit-btn').disabled = !(enoughSlots && subjectsAllValid());
 }
 
 // ---- Subject autocomplete (debounced) + "did you mean" ----
@@ -425,10 +489,23 @@ async function onSubmit(e) {
   e.preventDefault();
   const subjects = collectAlevels();
   if (totalSlots(subjects) < 2) return;
+  // Reject qualification subjects that are not on the valid-subject list.
+  if (!subjectsAllValid()) {
+    const rows = Array.from(document.querySelectorAll('.alevel-row'));
+    rows.forEach(validateSubjectField);
+    const firstBad = rows.find((r) => {
+      const val = r.querySelector('.al-subject').value.trim();
+      return val && matchSubject(val).status !== 'ok';
+    });
+    if (firstBad) firstBad.querySelector('.al-subject').focus();
+    return;
+  }
+  // Send the canonical spelling of each subject, not the raw typed value.
+  const normSubjects = subjects.map((s) => ({ ...s, subject: matchSubject(s.subject).canonical || s.subject }));
   showSkeletons();
 
   const payload = {
-    subjects,
+    subjects: normSubjects,
     courseInterest: el('course-interest').value.trim(),
     priority: el('priority').value,
     location: el('location').value,
@@ -556,7 +633,10 @@ document.addEventListener('DOMContentLoaded', () => {
     addAlevelRow();
     addAlevelRow();
   }
-  loadSubjects('');
+  loadSubjects('').then(() => {
+    document.querySelectorAll('.alevel-row').forEach(validateSubjectField);
+    validateForm();
+  });
   updateFreshnessStat();
   el('add-alevel').addEventListener('click', () => addAlevelRow());
   el('course-interest').addEventListener('input', (e) => {
