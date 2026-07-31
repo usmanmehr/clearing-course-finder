@@ -27,6 +27,10 @@ All notable changes to this project are documented in this file.
   so it no longer dominates the page. Colour scheme unchanged.
 - Dropped the year from the visible "Clearing 2027" labels (hero eyebrow, header
   pill) and page metadata - now reads "UCAS Clearing" / "Clearing".
+- Qualifications form: the subject field now validates against the predefined
+  subject list - non-matching free-text is rejected (inline error, submission
+  blocked), close typos get a "did you mean X?" fuzzy suggestion, and the
+  canonical spelling is submitted. Autocomplete/typeahead retained.
 
 ## [0.1.0] - Initial release
 
