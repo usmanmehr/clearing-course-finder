@@ -25,6 +25,8 @@ All notable changes to this project are documented in this file.
 - Hero banner made more compact: condensed the headline, lede, and the four
   selling points (all four kept), with reduced font sizes, spacing, and padding
   so it no longer dominates the page. Colour scheme unchanged.
+- Dropped the year from the visible "Clearing 2027" labels (hero eyebrow, header
+  pill) and page metadata - now reads "UCAS Clearing" / "Clearing".
 
 ## [0.1.0] - Initial release
 
