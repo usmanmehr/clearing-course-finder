@@ -18,6 +18,10 @@ All notable changes to this project are documented in this file.
 - Scraper schedules now have a retry policy (3 attempts) and a dedicated SQS
   dead-letter queue, so an undeliverable scheduled trigger is retried and then
   captured rather than silently lost.
+- Results page: removed the per-card "Clearing page checked X ago" timestamp and
+  the per-card status note; consolidated them into a single prominent disclaimer
+  at the top showing one global "last checked" time plus the caveat that status
+  is university-level (not course-level) and must be confirmed with the university.
 
 ## [0.1.0] - Initial release
 
