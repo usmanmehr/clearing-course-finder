@@ -511,3 +511,6 @@ button:active { transform: translateY(1px); }
     scroll-behavior: auto !important;
   }
 }
+
+/* Prominent results-page disclaimer (global last-checked + university-level caveat) */
+.results-disclaimer{border-left:4px solid #b8860b;background:rgba(184,134,11,.10);padding:.7rem .9rem;border-radius:6px;margin:0 0 .8rem;line-height:1.45}
