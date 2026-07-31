@@ -12,6 +12,9 @@ All notable changes to this project are documented in this file.
   - 14-31 Aug: four times per day
   - 1 Sep onwards: paused until the next cycle
   Implemented as time-bounded schedules; the scraper logic is unchanged.
+- Homepage freshness stat now reflects the real automated cadence (and the
+  actual "checked N ago" time where available), replacing a static "Hourly"
+  claim that no longer matched the schedule.
 
 ## [0.1.0] - Initial release
 
