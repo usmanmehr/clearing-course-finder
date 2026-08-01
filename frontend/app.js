@@ -1,4 +1,4 @@
-// UK Clearing Advisor 2027 - frontend logic (vanilla JS, no build step).
+// UK Clearing Advisor - frontend logic (vanilla JS, no build step).
 // Calls the API through the same CloudFront domain under /api/*.
 //
 // Content Security Policy note: this file is the ONLY place JavaScript lives.
