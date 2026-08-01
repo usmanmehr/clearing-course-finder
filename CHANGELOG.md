@@ -5,6 +5,11 @@ All notable changes to this project are documented in this file.
 ## [Unreleased]
 - FAQ: corrected the scraper-frequency wording to match the phased schedule (was "once a day"), and de-yeared the header pill to "Clearing".
 
+### Fixed
+- Homepage: corrected the stale Results Day date in the sources note from
+  "August 2027" to "August 2026" to match the actual Clearing cycle and
+  scraper schedule.
+
 ### Changed
 - FAQ contact email set to feedback@mehrs.net (was a placeholder).
 
