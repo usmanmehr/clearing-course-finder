@@ -4,6 +4,9 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 
+### Changed
+- FAQ contact email set to feedback@mehrs.net (was a placeholder).
+
 ### Added
 - Phased scraper schedule (EventBridge Scheduler) that triggers the
   clearing-page checker, replacing the previously unscheduled function:
