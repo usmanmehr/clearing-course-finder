@@ -4,6 +4,11 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 - FAQ: corrected the scraper-frequency wording to match the phased schedule (was "once a day"), and de-yeared the header pill to "Clearing".
+- Added a Grafana dashboard model, grafana/scraper-freshness-dashboard.json, for
+  monitoring scraper freshness and health (Lambda invocation history, duration,
+  DLQ depth, and a Logs Insights table of recent "scrape complete" runs).
+  Import-ready (templated CloudWatch datasource); built on AWS/Lambda + SQS
+  metrics and scraper logs. No account IDs or secrets included.
 
 ### Fixed
 - Homepage: corrected the stale Results Day date in the sources note from
