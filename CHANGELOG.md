@@ -4,6 +4,15 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 - FAQ: corrected the scraper-frequency wording to match the phased schedule (was "once a day"), and de-yeared the header pill to "Clearing".
+- Canary cadence reduced from every 1 minute to every 5 minutes (systemd timer
+  OnUnitActiveSec 60 -> 300). The canary only exercises the app's own endpoints
+  (/, /faq.html, /api/health, /api/search); it does NOT fetch university pages -
+  those are fetched solely by DailyScraper on its own schedule.
+- Grafana "2027 stack demand" dashboard: synthetic monitoring-canary traffic
+  (User-Agent ClearingAdvisor2027-Canary/1.0) is now excluded from every demand
+  panel and shown in a dedicated canary panel, so real student usage stats are
+  not polluted. (Dashboard lives on the Grafana box; no app code change - the
+  search log already records userAgent.)
 - Non-participating universities: added a participatesInClearing flag. Cambridge,
   Oxford, LSE, St Andrews and Imperial do not take part in UCAS Clearing. They are
   now SHOWN in results with an explicit Red "Does not take part in UCAS Clearing"
