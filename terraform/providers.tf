@@ -1,13 +1,22 @@
+# Common tags applied to every resource across all regions via provider
+# default_tags. Standardised on ManagedBy (replaces the old IaC key - one key,
+# one meaning). Component is NOT set here: it is added per-resource (e.g.
+# Component=canary on the canary resources) so it stays meaningful.
+locals {
+  common_tags = {
+    Project     = "uk-clearing-advisor"
+    Environment = "nonprod" # 2027 reproduction/comparison stack; flip to "prod" if reclassified
+    Cycle       = "2027"
+    ManagedBy   = "terraform"
+  }
+}
+
 # Default provider: main application + data region.
 provider "aws" {
   region = var.aws_region # eu-west-1
 
   default_tags {
-    tags = {
-      Project = "uk-clearing-advisor"
-      Cycle   = "2027"
-      IaC     = "terraform"
-    }
+    tags = local.common_tags
   }
 }
 
@@ -18,11 +27,7 @@ provider "aws" {
   region = "us-east-1"
 
   default_tags {
-    tags = {
-      Project = "uk-clearing-advisor"
-      Cycle   = "2027"
-      IaC     = "terraform"
-    }
+    tags = local.common_tags
   }
 }
 
@@ -34,10 +39,6 @@ provider "aws" {
   region = var.canary_region # eu-west-2
 
   default_tags {
-    tags = {
-      Project = "uk-clearing-advisor"
-      Cycle   = "2027"
-      IaC     = "terraform"
-    }
+    tags = local.common_tags
   }
 }
