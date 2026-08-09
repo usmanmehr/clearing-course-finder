@@ -1,0 +1,56 @@
+name: CI
+
+# GitHub Flow: short-lived feature/* branches -> PR into main. CI gates the PR.
+# No AWS credentials are used here - lint/validate/secret-scan only.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    name: Terraform fmt + validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.9.8"
+      - name: fmt check
+        run: terraform -chdir=terraform fmt -check -recursive
+      - name: init (no backend, no creds)
+        run: terraform -chdir=terraform init -backend=false -input=false
+      - name: validate
+        run: terraform -chdir=terraform validate
+
+  secret-scan:
+    name: Secret / personal-data scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: guardrail scan (all tracked files)
+        run: python3 scripts/check_sensitive_content.py --all
+
+  frontend-lint:
+    name: JS syntax check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: node --check on frontend + lambda sources
+        run: |
+          set -e
+          shopt -s nullglob
+          for f in frontend/*.js lambda/**/*.mjs lambda/*/*.mjs; do
+            echo "checking $f"
+            node --check "$f"
+          done
