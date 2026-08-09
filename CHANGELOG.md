@@ -3,6 +3,9 @@
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
+- Added a clear (x) button to the "What do you want to study?" field - appears
+  when the field has text, resets it and refocuses for a fresh search. Other form
+  behaviour preserved. Deployed app.js?v=4e900afa65, styles.css?v=8675975909.
 - Subject dropdown in the qualifications field is now sorted alphabetically
   (case-insensitive, display-only; validation/fuzzy matching unchanged). Deployed app.js?v=9b6ed81efc.
 - Fixed subject-autocomplete bug: the "What do you want to study?" field and the
