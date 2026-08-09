@@ -11,7 +11,10 @@ All notable changes to this project are documented in this file.
   two tag-based Resource Groups (one per region, eu-west-1 + eu-west-2) querying
   Project=uk-clearing-advisor + Cycle=2027. Plan: 4 add, 61 change, 2 destroy - the
   destroys/replacement being the canary instance (pending user_data change) whose
-  EIP reassociates.
+  EIP reassociates. APPLIED 2026-08-09: canary replaced (i-059082c...), EIP
+  13.134.182.146 reassociated, 61 resources retagged, both resource groups created
+  (eu-west-1: 36 resources, eu-west-2: 9); terraform plan converged to No changes.
+  Resource-group descriptions use only AWS-permitted characters (no parentheses).
 - Kept the 2026 live domain (clearing.mehrs.net) out of the repo: genericised the
   LIVE-2026-site dashboard title to "UK Clearing Advisor - LIVE 2026 site".
 - Versioned the Grafana dashboards in-repo under grafana/: added
