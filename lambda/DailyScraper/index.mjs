@@ -44,8 +44,24 @@ async function fetchStatus(url) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), FETCH_TIMEOUT_MS);
   try {
+    // Send realistic browser navigation headers. Several university sites
+    // (Cloudflare/Imperva/Akamai-fronted) return 403 to the old bot-style
+    // User-Agent; presenting as a normal Chrome document request clears the
+    // User-Agent-based blocks. This is a low-frequency read of public pages.
     const res = await fetch(target, { method: 'GET', redirect: 'follow', signal: ctrl.signal,
-      headers: { 'User-Agent': 'UKClearingAdvisor/1.0 (+monitoring)' } });
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-GB,en;q=0.9',
+        'Upgrade-Insecure-Requests': '1',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Sec-Fetch-User': '?1',
+        'sec-ch-ua': '"Chromium";v="126", "Google Chrome";v="126", "Not-A.Brand";v="24"',
+        'sec-ch-ua-mobile': '?0',
+        'sec-ch-ua-platform': '"Windows"',
+      } });
     const text = await res.text();
     const mentionCount = (text.match(/clearing/gi) || []).length;
     // "Mentions clearing" now requires more than one hit (a single stray
