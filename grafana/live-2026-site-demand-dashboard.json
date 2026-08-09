@@ -1,1 +1,288 @@
-{"uid": "student-demand-analytics", "title": "UK Clearing Advisor - LIVE 2026 site (clearing.mehrs.net)", "tags": ["clearing", "demand"], "timezone": "browser", "schemaVersion": 39, "version": 1, "refresh": "30m", "time": {"from": "now-30d", "to": "now"}, "panels": [{"id": 1, "title": "Student Demand Analytics - live searches (source: 2026 SearchCourses logs). Qualification type / letter grades are not captured upstream.", "type": "text", "gridPos": {"x": 0, "y": 0, "w": 24, "h": 3}, "options": {"mode": "markdown", "content": "**Student demand** from real searches on the live site. Fields available: course interest, number of qualifications, UCAS tariff (gradeTotal), results returned. A-level vs BTEC and letter grades are **not** logged upstream, so they are not shown."}}, {"id": 2, "title": "Search volume over time", "type": "timeseries", "datasource": {"type": "cloudwatch", "uid": "clearing-demand-cw"}, "gridPos": {"x": 0, "y": 3, "w": 12, "h": 8}, "targets": [{"refId": "A", "datasource": {"type": "cloudwatch", "uid": "clearing-demand-cw"}, "queryMode": "Logs", "region": "eu-west-2", "logGroupNames": ["/aws/lambda/ClearingAdvisor-SearchCourses"], "expression": "filter msg = \"search\" | stats count() as searches by bin(30m)", "statsGroups": []}], "options": {}, "fieldConfig": {"defaults": {}, "overrides": []}}, {"id": 3, "title": "Unmet demand: zero-result searches over time", "type": "timeseries", "datasource": {"type": "cloudwatch", "uid": "clearing-demand-cw"}, "gridPos": {"x": 12, "y": 3, "w": 12, "h": 8}, "targets": [{"refId": "A", "datasource": {"type": "cloudwatch", "uid": "clearing-demand-cw"}, "queryMode": "Logs", "region": "eu-west-2", "logGroupNames": ["/aws/lambda/ClearingAdvisor-SearchCourses"], "expression": "filter msg = \"search\" and resultsCount = 0 | stats count() as zero_results by bin(30m)", "statsGroups": []}], "options": {}, "fieldConfig": {"defaults": {}, "overrides": []}}, {"id": 4, "title": "Most-searched course interests", "type": "table", "datasource": {"type": "cloudwatch", "uid": "clearing-demand-cw"}, "gridPos": {"x": 0, "y": 11, "w": 12, "h": 9}, "targets": [{"refId": "A", "datasource": {"type": "cloudwatch", "uid": "clearing-demand-cw"}, "queryMode": "Logs", "region": "eu-west-2", "logGroupNames": ["/aws/lambda/ClearingAdvisor-SearchCourses"], "expression": "filter msg = \"search\" and ispresent(courseInterest) | stats count() as searches by courseInterest | sort searches desc | limit 20", "statsGroups": []}], "options": {}, "fieldConfig": {"defaults": {}, "overrides": []}}, {"id": 5, "title": "Applicant UCAS tariff (gradeTotal) distribution", "type": "table", "datasource": {"type": "cloudwatch", "uid": "clearing-demand-cw"}, "gridPos": {"x": 12, "y": 11, "w": 12, "h": 9}, "targets": [{"refId": "A", "datasource": {"type": "cloudwatch", "uid": "clearing-demand-cw"}, "queryMode": "Logs", "region": "eu-west-2", "logGroupNames": ["/aws/lambda/ClearingAdvisor-SearchCourses"], "expression": "filter msg = \"search\" | stats count() as searches by gradeTotal | sort gradeTotal asc", "statsGroups": []}], "options": {}, "fieldConfig": {"defaults": {}, "overrides": []}}, {"id": 6, "title": "Qualifications entered per search", "type": "table", "datasource": {"type": "cloudwatch", "uid": "clearing-demand-cw"}, "gridPos": {"x": 0, "y": 20, "w": 8, "h": 8}, "targets": [{"refId": "A", "datasource": {"type": "cloudwatch", "uid": "clearing-demand-cw"}, "queryMode": "Logs", "region": "eu-west-2", "logGroupNames": ["/aws/lambda/ClearingAdvisor-SearchCourses"], "expression": "filter msg = \"search\" | stats count() as searches by subjectCount | sort subjectCount asc", "statsGroups": []}], "options": {}, "fieldConfig": {"defaults": {}, "overrides": []}}, {"id": 7, "title": "Results returned per search", "type": "table", "datasource": {"type": "cloudwatch", "uid": "clearing-demand-cw"}, "gridPos": {"x": 8, "y": 20, "w": 8, "h": 8}, "targets": [{"refId": "A", "datasource": {"type": "cloudwatch", "uid": "clearing-demand-cw"}, "queryMode": "Logs", "region": "eu-west-2", "logGroupNames": ["/aws/lambda/ClearingAdvisor-SearchCourses"], "expression": "filter msg = \"search\" | stats count() as searches by resultsCount | sort resultsCount asc", "statsGroups": []}], "options": {}, "fieldConfig": {"defaults": {}, "overrides": []}}, {"id": 8, "title": "Total searches (range)", "type": "stat", "datasource": {"type": "cloudwatch", "uid": "clearing-demand-cw"}, "gridPos": {"x": 16, "y": 20, "w": 8, "h": 8}, "targets": [{"refId": "A", "datasource": {"type": "cloudwatch", "uid": "clearing-demand-cw"}, "queryMode": "Logs", "region": "eu-west-2", "logGroupNames": ["/aws/lambda/ClearingAdvisor-SearchCourses"], "expression": "filter msg = \"search\" | stats count() as total_searches", "statsGroups": []}], "options": {}, "fieldConfig": {"defaults": {}, "overrides": []}}], "templating": {"list": []}}
+{
+  "uid": "student-demand-analytics",
+  "title": "UK Clearing Advisor - LIVE 2026 site",
+  "tags": [
+    "clearing",
+    "demand"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30m",
+  "time": {
+    "from": "now-30d",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Student Demand Analytics - live searches (source: 2026 SearchCourses logs). Qualification type / letter grades are not captured upstream.",
+      "type": "text",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 3
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**Student demand** from real searches on the live site. Fields available: course interest, number of qualifications, UCAS tariff (gradeTotal), results returned. A-level vs BTEC and letter grades are **not** logged upstream, so they are not shown."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Search volume over time",
+      "type": "timeseries",
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "clearing-demand-cw"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 3,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "clearing-demand-cw"
+          },
+          "queryMode": "Logs",
+          "region": "eu-west-2",
+          "logGroupNames": [
+            "/aws/lambda/ClearingAdvisor-SearchCourses"
+          ],
+          "expression": "filter msg = \"search\" | stats count() as searches by bin(30m)",
+          "statsGroups": []
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 3,
+      "title": "Unmet demand: zero-result searches over time",
+      "type": "timeseries",
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "clearing-demand-cw"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 3,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "clearing-demand-cw"
+          },
+          "queryMode": "Logs",
+          "region": "eu-west-2",
+          "logGroupNames": [
+            "/aws/lambda/ClearingAdvisor-SearchCourses"
+          ],
+          "expression": "filter msg = \"search\" and resultsCount = 0 | stats count() as zero_results by bin(30m)",
+          "statsGroups": []
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 4,
+      "title": "Most-searched course interests",
+      "type": "table",
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "clearing-demand-cw"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 11,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "clearing-demand-cw"
+          },
+          "queryMode": "Logs",
+          "region": "eu-west-2",
+          "logGroupNames": [
+            "/aws/lambda/ClearingAdvisor-SearchCourses"
+          ],
+          "expression": "filter msg = \"search\" and ispresent(courseInterest) | stats count() as searches by courseInterest | sort searches desc | limit 20",
+          "statsGroups": []
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 5,
+      "title": "Applicant UCAS tariff (gradeTotal) distribution",
+      "type": "table",
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "clearing-demand-cw"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 11,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "clearing-demand-cw"
+          },
+          "queryMode": "Logs",
+          "region": "eu-west-2",
+          "logGroupNames": [
+            "/aws/lambda/ClearingAdvisor-SearchCourses"
+          ],
+          "expression": "filter msg = \"search\" | stats count() as searches by gradeTotal | sort gradeTotal asc",
+          "statsGroups": []
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 6,
+      "title": "Qualifications entered per search",
+      "type": "table",
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "clearing-demand-cw"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "clearing-demand-cw"
+          },
+          "queryMode": "Logs",
+          "region": "eu-west-2",
+          "logGroupNames": [
+            "/aws/lambda/ClearingAdvisor-SearchCourses"
+          ],
+          "expression": "filter msg = \"search\" | stats count() as searches by subjectCount | sort subjectCount asc",
+          "statsGroups": []
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 7,
+      "title": "Results returned per search",
+      "type": "table",
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "clearing-demand-cw"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 20,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "clearing-demand-cw"
+          },
+          "queryMode": "Logs",
+          "region": "eu-west-2",
+          "logGroupNames": [
+            "/aws/lambda/ClearingAdvisor-SearchCourses"
+          ],
+          "expression": "filter msg = \"search\" | stats count() as searches by resultsCount | sort resultsCount asc",
+          "statsGroups": []
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 8,
+      "title": "Total searches (range)",
+      "type": "stat",
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "clearing-demand-cw"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 20,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "clearing-demand-cw"
+          },
+          "queryMode": "Logs",
+          "region": "eu-west-2",
+          "logGroupNames": [
+            "/aws/lambda/ClearingAdvisor-SearchCourses"
+          ],
+          "expression": "filter msg = \"search\" | stats count() as total_searches",
+          "statsGroups": []
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    }
+  ],
+  "templating": {
+    "list": []
+  }
+}
