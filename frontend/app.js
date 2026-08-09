@@ -661,7 +661,7 @@ document.addEventListener('DOMContentLoaded', () => {
   el('add-alevel').addEventListener('click', () => addAlevelRow());
   const ciInput = el('course-interest');
   const clearCiBtn = el('clear-ci');
-  const toggleClearCi = () => { clearCiBtn.hidden = !ciInput.value; };
+  const toggleClearCi = () => { clearCiBtn.classList.toggle('is-visible', !!ciInput.value); };
   toggleClearCi(); // reflect any prefilled value on load
   clearCiBtn.addEventListener('click', () => {
     clearTimeout(debounce);
