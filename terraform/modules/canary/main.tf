@@ -1,5 +1,5 @@
 # End-to-end canary: a t3.micro in eu-west-2 that hits the live CloudFront URL
-# every minute and alarms on 403/429/5xx. Its EIP is allowlisted in the app WAF
+# every 5 minutes and alarms on 403/429/5xx. Its EIP is allowlisted in the app WAF
 # (see root main.tf -> waf.canary_allow_ip) so it bypasses the GB geo-block and
 # sees REAL errors, not geo-403s.
 #
@@ -128,10 +128,10 @@ locals {
     SVCEOF
     cat > /etc/systemd/system/canary.timer <<'TMREOF'
     [Unit]
-    Description=Run e2e canary every minute
+    Description=Run e2e canary every 5 minutes
     [Timer]
     OnBootSec=60
-    OnUnitActiveSec=60
+    OnUnitActiveSec=300
     [Install]
     WantedBy=timers.target
     TMREOF
