@@ -94,6 +94,16 @@ CONTACT_FIELDS = ["providerCode","universityName","ucasInstitutionCode","region"
                   "clearingEmail","clearingPage","hotlineOpens","clearingStatus",
                   "accommodationGuarantee","notes"]
 
+# Universities that do NOT take part in UCAS Clearing at all (no vacancies,
+# no Clearing page). Showing them with a Clearing status would mislead
+# students, so they are flagged participatesInClearing=false: SearchCourses
+# excludes them from Clearing results and DailyScraper skips fetching them
+# (they have no Clearing page to check). Keyed by providerCode.
+#   0114 Cambridge, 0111 Oxford - never enter Clearing.
+#   0086 LSE, 0116 St Andrews, 0060 Imperial - do not routinely enter Clearing;
+#         no Clearing vacancies page exists.
+NON_PARTICIPATING = {"0114", "0111", "0086", "0116", "0060"}
+
 # National subject medians (salary at 15 months post-graduation) and national
 # subject-level employability. These are NOT university-specific figures - they
 # are national medians for the subject and must be labelled as such in the UI.
@@ -166,6 +176,10 @@ def contact_item(row):
         "hotlineOpens": s(d["hotlineOpens"]),
         "clearingStatus": s(d["clearingStatus"]),
         "accommodationGuarantee": {"BOOL": bool(d["accommodationGuarantee"])},
+        # Whether this university takes part in UCAS Clearing at all. Non-
+        # participating institutions are excluded from Clearing results and
+        # skipped by the scraper (see NON_PARTICIPATING above).
+        "participatesInClearing": {"BOOL": d["providerCode"] not in NON_PARTICIPATING},
         "lastUpdated": s(NOW),
         # A full re-seed (PutItem replaces the whole item) is the only thing
         # that counts as a human-verified refresh of clearingStatus, so it
