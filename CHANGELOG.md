@@ -3,6 +3,12 @@
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
+- CI/process: adopted GitHub Flow (main + short-lived feature/* branches; develop
+  removed), added a CI-on-PR workflow (.github/workflows/ci.yml: terraform
+  fmt/validate, secret scan, JS syntax check - no AWS creds), and switched release
+  tags to semver (v1.0.0). Branch protection not enforced (GitHub Free private repo).
+- CI: bumped GitHub Actions to Node-24 majors (actions/checkout@v7, setup-python@v7,
+  setup-node@v7, hashicorp/setup-terraform@v4) to clear Node-20 deprecation warnings.
 - Fix: study-field clear (x) button was not appearing. Switched visibility from the
   fragile hidden-attribute toggle to an explicit .is-visible CSS class (display:none
   default, inline-flex when shown). Deployed app.js?v=d41be83dbc, styles.css?v=1aecd4a1ff.
