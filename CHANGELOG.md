@@ -3,6 +3,8 @@
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
+- Kept the 2026 live domain (clearing.mehrs.net) out of the repo: genericised the
+  LIVE-2026-site dashboard title to "UK Clearing Advisor - LIVE 2026 site".
 - Versioned the Grafana dashboards in-repo under grafana/: added
   2027-stack-demand-dashboard.json and live-2026-site-demand-dashboard.json
   (captured as-deployed from the box) plus a grafana/README.md inventory. The
