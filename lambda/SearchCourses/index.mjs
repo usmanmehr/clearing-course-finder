@@ -288,11 +288,13 @@ export const handler = async (event) => {
         if (fn && !fn(u)) continue;
       }
       if (body.russellGroupOnly && !u.russellGroup) continue;
-      // Skip institutions that do not take part in Clearing at all (no
-      // vacancies / no Clearing page) - showing them would mislead students.
-      if (u.participatesInClearing === false) continue;
-      // Skip institutions that do not enter clearing at all.
-      if ((u.clearingStatus || '').toLowerCase() === 'closed') continue;
+      // Universities that do not take part in Clearing are still shown (so a
+      // student isn't left wondering where they went), but clearly flagged
+      // via a Red "Does not take part in UCAS Clearing" badge and demoted to
+      // the bottom of the ranking (see rankCourses). Genuinely "closed"
+      // participating institutions are still skipped.
+      const nonParticipating = u.participatesInClearing === false;
+      if (!nonParticipating && (u.clearingStatus || '').toLowerCase() === 'closed') continue;
 
       const subjectName = resolved || 'Multiple subjects';
       const defaults = resolved ? SUBJECT_DEFAULTS_CACHE[resolved] : null;
@@ -324,7 +326,9 @@ export const handler = async (event) => {
         }
       }
 
-      const badge = statusBadge(u.clearingStatus);
+      const badge = nonParticipating
+        ? { colour: 'Red', label: 'Does not take part in UCAS Clearing' }
+        : statusBadge(u.clearingStatus);
       const codes = resolved ? (SUBJECTS[resolved] || []) : [];
 
       courses.push({
@@ -337,6 +341,7 @@ export const handler = async (event) => {
         russellGroup: !!u.russellGroup,
         clearingStatus: u.clearingStatus,
         statusBadge: badge,
+        nonParticipating,
         // gradeNumeric (from indicativeGrade()) is kept for filtering/ranking
         // ONLY, as an internal _-prefixed field stripped before the response.
         // We deliberately do NOT expose a typicalOffer/clearingGradeNumeric to
@@ -361,9 +366,11 @@ export const handler = async (event) => {
         hotlineOpens: u.hotlineOpens || null,
         estimatedData: true,
         courseLevelConfirmed: false,
-        statusNote: u.possibleStatusChange
-          ? 'Status shown is for the university overall, not this specific course. Our automated check has flagged a possible change to this page since it was last verified - please confirm directly with the university.'
-          : 'Status shown is for the university overall, not this specific course. Confirm this course is in Clearing with the university.',
+        statusNote: nonParticipating
+          ? 'This university does not take part in UCAS Clearing. There are no Clearing places here - apply through the main UCAS cycle at ucas.com.'
+          : (u.possibleStatusChange
+            ? 'Status shown is for the university overall, not this specific course. Our automated check has flagged a possible change to this page since it was last verified - please confirm directly with the university.'
+            : 'Status shown is for the university overall, not this specific course. Confirm this course is in Clearing with the university.'),
         // Data currency: lastVerified is the last human-confirmed re-seed;
         // lastAutomatedCheck is the last time the daily scraper checked this
         // university's clearing page; possibleStatusChange is set by the
@@ -547,6 +554,10 @@ function rankCourses(courses, priority) {
   }[priority] || { s: 0.35, e: 0.4, r: 0.25 };
 
   for (const c of courses) {
+    // Non-participating universities are shown for transparency but must never
+    // rank as if they were available Clearing options - force them below all
+    // real results.
+    if (c.nonParticipating) { c.score = -1; continue; }
     c.score = Number((
       weights.s * salaryScore(c) +
       weights.e * empScore(c) +
