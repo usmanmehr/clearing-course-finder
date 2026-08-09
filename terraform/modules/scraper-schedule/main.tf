@@ -71,9 +71,9 @@ resource "aws_iam_role_policy" "scheduler" {
 
 locals {
   phases = {
-    "p1-30min" = { expr = "rate(30 minutes)", start = null, end = "2026-08-11T23:00:00Z" }
+    "p1-30min"      = { expr = "rate(30 minutes)", start = null, end = "2026-08-11T23:00:00Z" }
     "p2-peak-10min" = { expr = "rate(10 minutes)", start = "2026-08-11T23:00:00Z", end = "2026-08-13T23:00:00Z" }
-    "p3-4xday" = { expr = "cron(0 0,6,12,18 * * ? *)", start = "2026-08-13T23:00:00Z", end = "2026-08-31T23:00:00Z" }
+    "p3-4xday"      = { expr = "cron(0 0,6,12,18 * * ? *)", start = "2026-08-13T23:00:00Z", end = "2026-08-31T23:00:00Z" }
   }
 }
 
