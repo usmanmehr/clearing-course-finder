@@ -209,7 +209,9 @@ async function processOne(u, results) {
 export const handler = async () => {
   const results = { changes: 0, errors: 0, count: 0 };
   const scan = await ddb.send(new ScanCommand({ TableName: CONTACTS_TABLE }));
-  const universities = (scan.Items || []).filter((u) => u.clearingPage);
+  // Skip universities that do not take part in Clearing (no Clearing page to
+  // check) - they would otherwise show as unreachable/blocked and waste fetches.
+  const universities = (scan.Items || []).filter((u) => u.clearingPage && u.participatesInClearing !== false);
   results.count = universities.length;
 
   // Bounded concurrency.
