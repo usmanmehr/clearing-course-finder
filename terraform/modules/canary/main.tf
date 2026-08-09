@@ -48,6 +48,7 @@ resource "aws_iam_role" "canary" {
     Version   = "2012-10-17"
     Statement = [{ Effect = "Allow", Principal = { Service = "ec2.amazonaws.com" }, Action = "sts:AssumeRole" }]
   })
+  tags = { Component = "canary" }
 }
 
 resource "aws_iam_role_policy_attachment" "ssm" {
@@ -72,6 +73,7 @@ resource "aws_iam_role_policy" "canary_metrics" {
 resource "aws_iam_instance_profile" "canary" {
   name = "${var.name_prefix}-canary-profile"
   role = aws_iam_role.canary.name
+  tags = { Component = "canary" }
 }
 
 # --- Security group: no inbound; egress 80/443/53 out for tests + SSM ---
@@ -101,6 +103,8 @@ resource "aws_security_group" "canary" {
     protocol    = "udp"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
+  tags = { Component = "canary" }
 }
 
 locals {
@@ -159,7 +163,7 @@ resource "aws_instance" "canary" {
     http_tokens = "required" # IMDSv2
   }
 
-  tags = { Name = "${var.name_prefix}-canary" }
+  tags = { Name = "${var.name_prefix}-canary", Component = "canary" }
 }
 
 resource "aws_eip_association" "canary" {
@@ -171,6 +175,7 @@ resource "aws_eip_association" "canary" {
 resource "aws_sns_topic" "canary" {
   name              = "${var.name_prefix}-canary-alerts"
   kms_master_key_id = "alias/aws/sns"
+  tags              = { Component = "canary" }
 }
 
 resource "aws_sns_topic_subscription" "email" {
@@ -192,6 +197,7 @@ resource "aws_cloudwatch_metric_alarm" "http_errors" {
   treat_missing_data  = "breaching" # canary silent = also a problem
   alarm_actions       = [aws_sns_topic.canary.arn]
   ok_actions          = [aws_sns_topic.canary.arn]
+  tags                = { Component = "canary" }
 }
 
 output "public_ip" { value = var.eip_public_ip }
