@@ -272,9 +272,14 @@ async function loadSubjects(q) {
     const res = await fetch(`${API}/subjects${q ? `?q=${encodeURIComponent(q)}` : ''}`, { cache: 'no-store' });
     if (!res.ok) return;
     const data = await res.json();
+    // Sort alphabetically (case-insensitive) so the datalist dropdown appears
+    // in order. Order does not affect validation/fuzzy matching (matchSubject
+    // scans the whole list), so this is display-only.
+    const subjects = (data.subjects || []).slice()
+      .sort((a, b) => a.localeCompare(b, 'en-GB', { sensitivity: 'base' }));
     const list = el('subject-list');
-    list.innerHTML = (data.subjects || []).map((s) => `<option value="${escapeHtml(s)}">`).join('');
-    if (!q) subjectNames = data.subjects || []; // cache the full list from the initial empty-query load
+    list.innerHTML = subjects.map((s) => `<option value="${escapeHtml(s)}">`).join('');
+    if (!q) subjectNames = subjects; // cache the full (sorted) list from the initial empty-query load
   } catch { /* non-fatal */ }
 }
 
