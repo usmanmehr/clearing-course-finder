@@ -12,7 +12,7 @@ must be actively built | **[decide]** needs a product/owner decision.
 
 | ID | Item | Status in 2027 plan |
 |----|------|---------------------|
-| C1 | Origin-verify secret defaulted to `change-me`, stored as plaintext Lambda env var (`./reference/2026-cloudformation/cdn.yaml`, `compute.yaml`, `grafana.yaml`) | **[do-in-2027]** Source from Secrets Manager; required TF variable with no default. Longer term, migrate to CloudFront OAC / signed origin so there is no shared secret at all (see A below). |
+| C1 | Origin-verify secret defaulted to a hardcoded placeholder, stored as plaintext Lambda env var (`./reference/2026-cloudformation/cdn.yaml`, `compute.yaml`, `grafana.yaml`) | **[do-in-2027]** Source from Secrets Manager; required TF variable with no default. Longer term, migrate to CloudFront OAC / signed origin so there is no shared secret at all (see A below). |
 | H4 | Lambda `live` alias did not advance on deploys (`AWS::Lambda::Version` only republishes on its own prop change) | **[TF-fixes]** `aws_lambda_function{ publish = true }` + `aws_lambda_alias` tracks the published version automatically. |
 
 ## High-severity findings (2026 review)
