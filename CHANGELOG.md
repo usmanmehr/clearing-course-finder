@@ -3,6 +3,9 @@
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
+- Fix: study-field clear (x) button was not appearing. Switched visibility from the
+  fragile hidden-attribute toggle to an explicit .is-visible CSS class (display:none
+  default, inline-flex when shown). Deployed app.js?v=d41be83dbc, styles.css?v=1aecd4a1ff.
 - Added a clear (x) button to the "What do you want to study?" field - appears
   when the field has text, resets it and refocuses for a fresh search. Other form
   behaviour preserved. Deployed app.js?v=4e900afa65, styles.css?v=8675975909.
