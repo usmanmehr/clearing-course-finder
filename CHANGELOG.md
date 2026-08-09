@@ -4,6 +4,16 @@ All notable changes to this project are documented in this file.
 
 ## [Unreleased]
 - FAQ: corrected the scraper-frequency wording to match the phased schedule (was "once a day"), and de-yeared the header pill to "Clearing".
+- Scraper anti-blocking: DailyScraper now sends realistic browser navigation
+  headers (Chrome User-Agent + Accept/Accept-Language/Sec-Fetch/sec-ch-ua)
+  instead of a bot User-Agent, clearing User-Agent-based 403 blocks on several
+  university sites (blocked count dropped 8 -> 5).
+- Corrected 10 stale university clearing-page URLs (were returning 404) to their
+  current official paths; 9 now resolve 200 (Coventry intermittently times out
+  from the scraper's egress). Applied to the live universities table and the
+  seed source (scripts/seed.py). Non-participating universities (Cambridge, LSE,
+  St Andrews, Imperial) were left unchanged pending a "does not take part in
+  Clearing" data treatment rather than a misleading URL.
 - Added a Grafana dashboard model, grafana/scraper-freshness-dashboard.json, for
   monitoring scraper freshness and health (Lambda invocation history, duration,
   DLQ depth, and a Logs Insights table of recent "scrape complete" runs).
