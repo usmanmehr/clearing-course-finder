@@ -5,10 +5,11 @@ All notable changes to this project are documented in this file.
 ## [Unreleased]
 - FAQ: corrected the scraper-frequency wording to match the phased schedule (was "once a day"), and de-yeared the header pill to "Clearing".
 - Non-participating universities: added a participatesInClearing flag. Cambridge,
-  Oxford, LSE, St Andrews and Imperial do not take part in UCAS Clearing, so they
-  are now excluded from Clearing results (SearchCourses) and skipped by the
-  scraper (DailyScraper) instead of being shown with a misleading "opens on
-  Results Day" status. Flag seeded in scripts/seed.py and applied to the live
+  Oxford, LSE, St Andrews and Imperial do not take part in UCAS Clearing. They are
+  now SHOWN in results with an explicit Red "Does not take part in UCAS Clearing"
+  badge and a note to apply via the main UCAS cycle (not silently hidden), demoted
+  to the bottom of the ranking so they never appear as available options, and
+  skipped by the scraper. Flag seeded in scripts/seed.py and applied to the live
   table; their stale scraper status was cleared.
 - Scraper anti-blocking: DailyScraper now sends realistic browser navigation
   headers (Chrome User-Agent + Accept/Accept-Language/Sec-Fetch/sec-ch-ua)
