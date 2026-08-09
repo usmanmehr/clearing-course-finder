@@ -1,0 +1,362 @@
+{
+  "uid": "clearing-2027-demand",
+  "title": "UK Clearing Advisor - 2027 stack demand (clearing-2026.mehrs.net)",
+  "tags": [
+    "clearing",
+    "demand",
+    "2027-stack"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30m",
+  "time": {
+    "from": "now-30d",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "info",
+      "type": "text",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 3
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**2027 stack demand** (source: clearing-2026.mehrs.net / uk-clearing-advisor-2027 SearchCourses logs, eu-west-1). Richer schema: qualification path, priority, location, geo. Low volume until the site takes real traffic.\n\n**Note:** synthetic monitoring-canary traffic (User-Agent `ClearingAdvisor2027-Canary/1.0`) is excluded from every demand panel above and shown only in the dedicated canary panel, so real student usage stats are not polluted."
+      }
+    },
+    {
+      "id": 2,
+      "title": "Search volume over time",
+      "type": "timeseries",
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "clearing-2027-cw"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 3,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "clearing-2027-cw"
+          },
+          "queryMode": "Logs",
+          "region": "eu-west-1",
+          "logGroupNames": [
+            "/aws/lambda/uk-clearing-advisor-2027-SearchCourses"
+          ],
+          "expression": "filter msg = \"search\" and userAgent != \"ClearingAdvisor2027-Canary/1.0\" | stats count() as searches by bin(30m)",
+          "statsGroups": []
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 3,
+      "title": "Zero-result searches over time (unmet demand)",
+      "type": "timeseries",
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "clearing-2027-cw"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 3,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "clearing-2027-cw"
+          },
+          "queryMode": "Logs",
+          "region": "eu-west-1",
+          "logGroupNames": [
+            "/aws/lambda/uk-clearing-advisor-2027-SearchCourses"
+          ],
+          "expression": "filter msg = \"search\" and userAgent != \"ClearingAdvisor2027-Canary/1.0\" and resultsCount = 0 | stats count() as zero_results by bin(30m)",
+          "statsGroups": []
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 4,
+      "title": "Most-searched course interests",
+      "type": "table",
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "clearing-2027-cw"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 11,
+        "w": 12,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "clearing-2027-cw"
+          },
+          "queryMode": "Logs",
+          "region": "eu-west-1",
+          "logGroupNames": [
+            "/aws/lambda/uk-clearing-advisor-2027-SearchCourses"
+          ],
+          "expression": "filter msg = \"search\" and userAgent != \"ClearingAdvisor2027-Canary/1.0\" and ispresent(courseInterest) | stats count() as searches by courseInterest | sort searches desc | limit 20",
+          "statsGroups": []
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 5,
+      "title": "Qualification path (A-level / BTEC / mixed)",
+      "type": "table",
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "clearing-2027-cw"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 11,
+        "w": 6,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "clearing-2027-cw"
+          },
+          "queryMode": "Logs",
+          "region": "eu-west-1",
+          "logGroupNames": [
+            "/aws/lambda/uk-clearing-advisor-2027-SearchCourses"
+          ],
+          "expression": "filter msg = \"search\" and userAgent != \"ClearingAdvisor2027-Canary/1.0\" | stats count() as searches by qualificationPath | sort searches desc",
+          "statsGroups": []
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 6,
+      "title": "Sort priority preference",
+      "type": "table",
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "clearing-2027-cw"
+      },
+      "gridPos": {
+        "x": 18,
+        "y": 11,
+        "w": 6,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "clearing-2027-cw"
+          },
+          "queryMode": "Logs",
+          "region": "eu-west-1",
+          "logGroupNames": [
+            "/aws/lambda/uk-clearing-advisor-2027-SearchCourses"
+          ],
+          "expression": "filter msg = \"search\" and userAgent != \"ClearingAdvisor2027-Canary/1.0\" | stats count() as searches by priority | sort searches desc",
+          "statsGroups": []
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 7,
+      "title": "Applicant UCAS tariff (gradeTotal) distribution",
+      "type": "table",
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "clearing-2027-cw"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "clearing-2027-cw"
+          },
+          "queryMode": "Logs",
+          "region": "eu-west-1",
+          "logGroupNames": [
+            "/aws/lambda/uk-clearing-advisor-2027-SearchCourses"
+          ],
+          "expression": "filter msg = \"search\" and userAgent != \"ClearingAdvisor2027-Canary/1.0\" | stats count() as searches by gradeTotal | sort gradeTotal asc",
+          "statsGroups": []
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 8,
+      "title": "Location filter used",
+      "type": "table",
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "clearing-2027-cw"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 20,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "clearing-2027-cw"
+          },
+          "queryMode": "Logs",
+          "region": "eu-west-1",
+          "logGroupNames": [
+            "/aws/lambda/uk-clearing-advisor-2027-SearchCourses"
+          ],
+          "expression": "filter msg = \"search\" and userAgent != \"ClearingAdvisor2027-Canary/1.0\" | stats count() as searches by locationFilter | sort searches desc",
+          "statsGroups": []
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 9,
+      "title": "Searcher region (geo)",
+      "type": "table",
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "clearing-2027-cw"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 20,
+        "w": 8,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "clearing-2027-cw"
+          },
+          "queryMode": "Logs",
+          "region": "eu-west-1",
+          "logGroupNames": [
+            "/aws/lambda/uk-clearing-advisor-2027-SearchCourses"
+          ],
+          "expression": "filter msg = \"search\" and userAgent != \"ClearingAdvisor2027-Canary/1.0\" and ispresent(geoRegion) | stats count() as searches by geoRegion | sort searches desc | limit 15",
+          "statsGroups": []
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      }
+    },
+    {
+      "id": 10,
+      "title": "Canary (synthetic) health traffic - EXCLUDED from the stats above",
+      "type": "timeseries",
+      "datasource": {
+        "type": "cloudwatch",
+        "uid": "clearing-2027-cw"
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 28
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "cloudwatch",
+            "uid": "clearing-2027-cw"
+          },
+          "queryMode": "Logs",
+          "region": "eu-west-1",
+          "logGroupNames": [
+            "/aws/lambda/uk-clearing-advisor-2027-SearchCourses"
+          ],
+          "expression": "filter msg = \"search\" and userAgent = \"ClearingAdvisor2027-Canary/1.0\" | stats count() as canary_checks by bin(30m)",
+          "statsGroups": []
+        }
+      ],
+      "options": {},
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "description": "Automated e2e health checks from the monitoring canary (User-Agent ClearingAdvisor2027-Canary/1.0). Shown separately so synthetic traffic never inflates real student demand."
+    }
+  ],
+  "templating": {
+    "list": []
+  }
+}
