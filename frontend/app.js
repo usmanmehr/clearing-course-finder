@@ -659,7 +659,19 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   updateFreshnessStat();
   el('add-alevel').addEventListener('click', () => addAlevelRow());
-  el('course-interest').addEventListener('input', (e) => {
+  const ciInput = el('course-interest');
+  const clearCiBtn = el('clear-ci');
+  const toggleClearCi = () => { clearCiBtn.hidden = !ciInput.value; };
+  toggleClearCi(); // reflect any prefilled value on load
+  clearCiBtn.addEventListener('click', () => {
+    clearTimeout(debounce);
+    ciInput.value = '';
+    el('did-you-mean').hidden = true;
+    toggleClearCi();
+    ciInput.focus();
+  });
+  ciInput.addEventListener('input', (e) => {
+    toggleClearCi();
     clearTimeout(debounce);
     const q = e.target.value.trim();
     if (q.length >= 2) {
