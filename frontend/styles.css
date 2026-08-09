@@ -520,3 +520,22 @@ button:active { transform: translateY(1px); }
 .al-subject-error{color:#c0392b;font-size:.82rem;margin:.3rem 0 0;line-height:1.35}
 .al-subject[aria-invalid="true"]{border-color:#c0392b}
 .subj-suggest{background:none;border:0;padding:0;color:var(--brand);font:inherit;text-decoration:underline;cursor:pointer}
+
+/* Clear (x) button inside the "What do you want to study?" field */
+.input-clear-wrap { position: relative; }
+.input-clear-wrap input { width: 100%; padding-right: 2.2rem; }
+.clear-input {
+  position: absolute;
+  right: 0.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.3rem;
+  line-height: 1;
+  padding: 0 0.25rem;
+  color: var(--ink-soft);
+}
+.clear-input:hover { color: var(--red-ink); }
+.clear-input:focus-visible { outline: 2px solid var(--amber-ink); border-radius: 4px; }
