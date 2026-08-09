@@ -3,6 +3,15 @@
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
+- Tag normalisation: provider default_tags now applied via a shared local across
+  all three regions (eu-west-1, us-east-1, eu-west-2) - Project=uk-clearing-advisor,
+  Environment=nonprod, Cycle=2027, ManagedBy=terraform. Standardised on ManagedBy
+  and dropped the duplicate IaC key. Added Component=canary to the canary resources
+  (instance, security group, IAM role + instance profile, SNS topic, alarm). Added
+  two tag-based Resource Groups (one per region, eu-west-1 + eu-west-2) querying
+  Project=uk-clearing-advisor + Cycle=2027. Plan: 4 add, 61 change, 2 destroy - the
+  destroys/replacement being the canary instance (pending user_data change) whose
+  EIP reassociates.
 - Kept the 2026 live domain (clearing.mehrs.net) out of the repo: genericised the
   LIVE-2026-site dashboard title to "UK Clearing Advisor - LIVE 2026 site".
 - Versioned the Grafana dashboards in-repo under grafana/: added
