@@ -658,7 +658,13 @@ document.addEventListener('DOMContentLoaded', () => {
     clearTimeout(debounce);
     const q = e.target.value.trim();
     if (q.length >= 2) {
-      debounce = setTimeout(() => { loadSubjects(q); renderDidYouMean(q); }, 300);
+      // Do NOT re-fetch a server-filtered list into #subject-list here: that
+      // datalist is SHARED with the "Your qualifications" subject fields, so
+      // narrowing it to the typed study subject made those fields show only
+      // that one subject. The full list is loaded once at init and the browser
+      // filters the datalist natively as the user types. Keep only the fuzzy
+      // "did you mean" suggestion for the study field.
+      debounce = setTimeout(() => { renderDidYouMean(q); }, 300);
     } else {
       el('did-you-mean').hidden = true;
     }
