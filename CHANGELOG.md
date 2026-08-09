@@ -3,6 +3,13 @@
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
+- Fixed stale-asset caching (was serving old app.js from browser cache, which
+  silently disabled subject-input validation): added scripts/deploy_frontend.py
+  which content-hashes app.js/styles.css, rewrites HTML refs to `/app.js?v=<hash>`,
+  uploads hashed assets with `Cache-Control: public, max-age=31536000, immutable`
+  and HTML with `no-cache`, then invalidates CloudFront. New content = new URL =
+  guaranteed-fresh in the browser, no hard-refresh needed. Deployed (app.js?v=35ba5e380b,
+  styles.css?v=87205f3ebc). Repo HTML keeps plain refs; the ?v is injected at deploy time.
 - Tag normalisation: provider default_tags now applied via a shared local across
   all three regions (eu-west-1, us-east-1, eu-west-2) - Project=uk-clearing-advisor,
   Environment=nonprod, Cycle=2027, ManagedBy=terraform. Standardised on ManagedBy
