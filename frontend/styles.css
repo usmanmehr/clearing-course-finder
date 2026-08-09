@@ -525,10 +525,13 @@ button:active { transform: translateY(1px); }
 .input-clear-wrap { position: relative; }
 .input-clear-wrap input { width: 100%; padding-right: 2.2rem; }
 .clear-input {
+  display: none;
   position: absolute;
   right: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
+  align-items: center;
+  justify-content: center;
   border: none;
   background: transparent;
   cursor: pointer;
@@ -537,5 +540,6 @@ button:active { transform: translateY(1px); }
   padding: 0 0.25rem;
   color: var(--ink-soft);
 }
+.clear-input.is-visible { display: inline-flex; }
 .clear-input:hover { color: var(--red-ink); }
 .clear-input:focus-visible { outline: 2px solid var(--amber-ink); border-radius: 4px; }
