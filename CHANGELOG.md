@@ -3,6 +3,13 @@
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
+- Fixed subject-autocomplete bug: the "What do you want to study?" field and the
+  "Your qualifications" subject fields share one <datalist id="subject-list">, and
+  typing in the study field re-fetched a server-filtered list into that shared
+  datalist - narrowing the qualifications dropdown to just the typed subject. The
+  study-field handler no longer re-fetches/narrows the datalist; the full list is
+  loaded once and the browser filters it natively, so the qualifications field
+  always shows all valid subjects. Deployed app.js?v=55ee072bfd.
 - CI fixes (first Actions run on main): `terraform fmt` on modules/scraper-schedule/main.tf
   (misaligned map), and reworded IMPROVEMENTS-2027.md to drop the literal weak-secret
   string that the guardrail secret-scan (correctly) flags anywhere it appears.
