@@ -308,6 +308,21 @@ function renderDidYouMean(query) {
 function courseCard(c) {
   const badge = c.statusBadge || { colour: 'Amber', label: 'Check on Results Day' };
   const badgeColour = BADGE_COLOURS[badge.colour] || 'Amber';
+
+  // Non-participating universities: a clear, self-contained card - no Clearing
+  // phone/page/Results-Day text, because there are no Clearing places here.
+  if (c.nonParticipating) {
+    const npProspects = (c.graduateProspects != null)
+      ? `<div class="stat-row"><div class="stat"><b>${escapeHtml(c.graduateProspects)}%</b><span>graduate prospects</span></div></div>`
+      : '';
+    return `<article class="course">
+    <h3>${escapeHtml(c.universityName)}</h3>
+    <div class="meta">${escapeHtml(c.courseTitle)}${c.ucasCode ? ` \u00b7 UCAS ${escapeHtml(c.ucasCode)}` : ''} \u00b7 ${escapeHtml(c.location)} \u00b7
+      <span class="badge Red">${escapeHtml(badge.label)}</span></div>
+    ${npProspects}
+    <div class="warn">This university does not take part in UCAS Clearing. There are no Clearing places here - apply through the main UCAS cycle at <a href="https://www.ucas.com" target="_blank" rel="noopener">ucas.com</a> during the normal application window.</div>
+  </article>`;
+  }
   const phone = c.clearingPhone
     ? `<a href="tel:${escapeHtml(String(c.clearingPhone).replace(/[^+\d]/g, ''))}">${escapeHtml(c.clearingPhone)}</a>`
     : 'See clearing page';
