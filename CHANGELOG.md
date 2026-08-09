@@ -3,6 +3,9 @@
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
+- CI fixes (first Actions run on main): `terraform fmt` on modules/scraper-schedule/main.tf
+  (misaligned map), and reworded IMPROVEMENTS-2027.md to drop the literal weak-secret
+  string that the guardrail secret-scan (correctly) flags anywhere it appears.
 - Fixed stale-asset caching (was serving old app.js from browser cache, which
   silently disabled subject-input validation): added scripts/deploy_frontend.py
   which content-hashes app.js/styles.css, rewrites HTML refs to `/app.js?v=<hash>`,
