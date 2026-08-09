@@ -288,6 +288,9 @@ export const handler = async (event) => {
         if (fn && !fn(u)) continue;
       }
       if (body.russellGroupOnly && !u.russellGroup) continue;
+      // Skip institutions that do not take part in Clearing at all (no
+      // vacancies / no Clearing page) - showing them would mislead students.
+      if (u.participatesInClearing === false) continue;
       // Skip institutions that do not enter clearing at all.
       if ((u.clearingStatus || '').toLowerCase() === 'closed') continue;
 
