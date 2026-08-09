@@ -3,6 +3,10 @@
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
+- Versioned the Grafana dashboards in-repo under grafana/: added
+  2027-stack-demand-dashboard.json and live-2026-site-demand-dashboard.json
+  (captured as-deployed from the box) plus a grafana/README.md inventory. The
+  freshness dashboard was already tracked. No account IDs/secrets included.
 - FAQ: corrected the scraper-frequency wording to match the phased schedule (was "once a day"), and de-yeared the header pill to "Clearing".
 - Canary cadence reduced from every 1 minute to every 5 minutes (systemd timer
   OnUnitActiveSec 60 -> 300). The canary only exercises the app's own endpoints
