@@ -18,7 +18,7 @@ locals {
 
 resource "aws_resourcegroups_group" "clearing_eu_west_1" {
   name        = "uk-clearing-advisor-2027-eu-west-1"
-  description = "UK Clearing Advisor 2027 stack resources in eu-west-1 (tag query Project + Cycle)."
+  description = "UK Clearing Advisor 2027 stack resources in eu-west-1 - tag query Project and Cycle."
 
   resource_query {
     query = local.clearing_group_query
@@ -28,7 +28,7 @@ resource "aws_resourcegroups_group" "clearing_eu_west_1" {
 resource "aws_resourcegroups_group" "clearing_eu_west_2" {
   provider    = aws.eu_west_2
   name        = "uk-clearing-advisor-2027-eu-west-2"
-  description = "UK Clearing Advisor 2027 stack resources in eu-west-2 (tag query Project + Cycle)."
+  description = "UK Clearing Advisor 2027 stack resources in eu-west-2 - tag query Project and Cycle."
 
   resource_query {
     query = local.clearing_group_query
