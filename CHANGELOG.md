@@ -3,6 +3,8 @@
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
+- Subject dropdown in the qualifications field is now sorted alphabetically
+  (case-insensitive, display-only; validation/fuzzy matching unchanged). Deployed app.js?v=9b6ed81efc.
 - Fixed subject-autocomplete bug: the "What do you want to study?" field and the
   "Your qualifications" subject fields share one <datalist id="subject-list">, and
   typing in the study field re-fetched a server-filtered list into that shared
