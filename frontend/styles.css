@@ -599,3 +599,18 @@ button:active { transform: translateY(1px); }
 .live-list a { color: var(--ink); font-weight: 600; text-decoration: none; }
 .live-list a:hover { color: var(--brand); text-decoration: underline; }
 .lc-meta { color: var(--muted); font-size: 0.82rem; font-weight: 400; }
+/* Real per-course Clearing status pills (e.g. Lincoln). */
+.lc-status {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.08rem 0.4rem;
+  border-radius: 999px;
+  vertical-align: middle;
+}
+.lc-status.open { background: var(--green-bg); color: var(--green-ink); }
+.lc-status.closed { background: var(--red-bg); color: var(--red-ink); }
+.live-list li.lc-closed a { color: var(--muted); }
+.live-list li.lc-closed { opacity: 0.72; }
