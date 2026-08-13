@@ -310,6 +310,66 @@ function renderDidYouMean(query) {
 }
 
 // ---- Rendering ----
+
+// Format an ISO-8601 UTC timestamp (as written by ingest_live_courses.py,
+// e.g. "2026-08-13T18:03:56Z") into a short human string for the provenance
+// line. Falls back to the raw value if it can't be parsed.
+function fmtFetched(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getUTCDate()} ${months[d.getUTCMonth()]} ${d.getUTCFullYear()}, ${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())} UTC`;
+}
+
+// Expandable, clearly-labelled block of REAL per-course Clearing listings
+// scraped from a university's own live page (Option B). Renders nothing unless
+// the server attached a non-empty liveCourses array. Every course links to the
+// university's own course page; the block carries an explicit source + fetch
+// time and a "confirm with the university" caveat, because vacancies change
+// hour-to-hour on Results Day. When the captured list is partial (the page's
+// full list is JS/AJAX-driven), a prominent note says so and the live page
+// stays the authoritative source.
+function liveCoursesBlock(c) {
+  if (!Array.isArray(c.liveCourses) || !c.liveCourses.length) return '';
+  const src = safeHttpsUrl(c.liveCoursesSource);
+  const fetched = fmtFetched(c.liveCoursesFetchedAt);
+  const count = c.liveCoursesCount != null ? c.liveCoursesCount : c.liveCourses.length;
+  const srcLink = src
+    ? `<a href="${escapeHtml(src)}" target="_blank" rel="noopener">the university's live Clearing page</a>`
+    : "the university's live Clearing page";
+  const provenance = `<div class="live-src">Scraped from ${srcLink}${fetched ? ` - fetched ${escapeHtml(fetched)}` : ''}. `
+    + `Clearing vacancies can change within the hour on Results Day - always confirm the course is still open with the university before applying.</div>`;
+  const partial = c.liveCoursesPartial
+    ? `<div class="warn live-partial">${escapeHtml(c.liveCoursesPartialNote || 'This is only a sample of this university\u2019s Clearing courses. Open the live page above for the full list.')}</div>`
+    : '';
+  const items = c.liveCourses.map((lc) => {
+    const bits = [];
+    if (lc.degree) bits.push(escapeHtml(lc.degree));
+    if (lc.ucasCode) bits.push(`UCAS ${escapeHtml(lc.ucasCode)}`);
+    if (lc.type) bits.push(escapeHtml(lc.type));
+    if (lc.aLevel) bits.push(`A-level ${escapeHtml(lc.aLevel)}`);
+    if (lc.btec) bits.push(`BTEC ${escapeHtml(lc.btec)}`);
+    if (lc.ib) bits.push(`IB ${escapeHtml(lc.ib)}`);
+    const meta = bits.length ? ` <span class="lc-meta">${bits.join(' \u00b7 ')}</span>` : '';
+    const lcUrl = safeHttpsUrl(lc.url);
+    const title = lcUrl
+      ? `<a href="${escapeHtml(lcUrl)}" target="_blank" rel="noopener">${escapeHtml(lc.title)}</a>`
+      : escapeHtml(lc.title);
+    return `<li>${title}${meta}</li>`;
+  }).join('');
+  const label = c.liveCoursesPartial
+    ? `View a sample of live Clearing courses (${escapeHtml(count)} shown)`
+    : `View ${escapeHtml(count)} live Clearing courses`;
+  return `<details class="live-courses">
+      <summary>${label}</summary>
+      ${provenance}
+      ${partial}
+      <ul class="live-list">${items}</ul>
+    </details>`;
+}
+
 function courseCard(c) {
   const badge = c.statusBadge || { colour: 'Amber', label: 'Check on Results Day' };
   const badgeColour = BADGE_COLOURS[badge.colour] || 'Amber';
@@ -395,6 +455,7 @@ function courseCard(c) {
     <div class="meta">${escapeHtml(c.courseTitle)}${c.ucasCode ? ` \u00b7 UCAS ${escapeHtml(c.ucasCode)}` : ''} \u00b7 ${escapeHtml(c.location)} \u00b7
       <span class="badge ${badgeColour}">${escapeHtml(badge.label)}</span>${est}</div>
     ${cta}
+    ${liveCoursesBlock(c)}
     <div class="stat-row">
       ${stats.join('\n      ')}
     </div>
