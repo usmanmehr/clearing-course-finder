@@ -383,12 +383,19 @@ function liveCoursesBlock(c) {
     if (lc.aLevel) bits.push(`A-level ${escapeHtml(lc.aLevel)}`);
     if (lc.btec) bits.push(`BTEC ${escapeHtml(lc.btec)}`);
     if (lc.ib) bits.push(`IB ${escapeHtml(lc.ib)}`);
+    if (lc.tariff) bits.push(escapeHtml(lc.tariff));
     const meta = bits.length ? ` <span class="lc-meta">${bits.join(' \u00b7 ')}</span>` : '';
+    // Real per-course Clearing status, where the source publishes it (e.g.
+    // Lincoln). "closed" courses are shown - not hidden - so a student knows
+    // this specific course is full, rather than being left to guess.
+    const status = lc.status === 'open'
+      ? '<span class="lc-status open">Open</span> '
+      : (lc.status === 'closed' ? '<span class="lc-status closed">Closed</span> ' : '');
     const lcUrl = safeHttpsUrl(lc.url);
     const title = lcUrl
       ? `<a href="${escapeHtml(lcUrl)}" target="_blank" rel="noopener">${escapeHtml(lc.title)}</a>`
       : escapeHtml(lc.title);
-    return `<li>${title}${meta}</li>`;
+    return `<li class="${lc.status === 'closed' ? 'lc-closed' : ''}">${status}${title}${meta}</li>`;
   }).join('');
 
   let label;
