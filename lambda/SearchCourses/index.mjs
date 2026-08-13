@@ -188,6 +188,26 @@ function validate(body) {
   return null;
 }
 
+// Bound the per-university live-course payload. SearchCourses would otherwise
+// attach a university's ENTIRE stored liveCourses list to every result, and a
+// broad search returning several big-list universities (Lancaster 361, Leeds
+// 308, Loughborough 274, UCL 245...) could produce a multi-MB response and
+// blow the 400KB DynamoDB query-cache item limit. So: filter to the searched
+// subject over the FULL stored list (server-side, so matches beyond any cap
+// are still found), then cap. Total + matched counts are always returned so
+// the UI can label honestly ("N of TOTAL", "none match", "showing first 60").
+const LIVE_COURSES_CAP = 60;
+function scopeLiveCourses(u, resolved) {
+  const all = Array.isArray(u.liveCourses) ? u.liveCourses : null;
+  if (!all || !all.length) return { list: null, matched: null, truncated: false };
+  if (resolved) {
+    const s = resolved.toLowerCase();
+    const m = all.filter((x) => (x.title || '').toLowerCase().includes(s));
+    return { list: m.slice(0, LIVE_COURSES_CAP), matched: m.length, truncated: m.length > LIVE_COURSES_CAP };
+  }
+  return { list: all.slice(0, LIVE_COURSES_CAP), matched: null, truncated: all.length > LIVE_COURSES_CAP };
+}
+
 export const handler = async (event) => {
   const started = Date.now();
   const requestId = event?.requestContext?.requestId || randomUUID();
@@ -330,6 +350,7 @@ export const handler = async (event) => {
         ? { colour: 'Red', label: 'Does not take part in UCAS Clearing' }
         : statusBadge(u.clearingStatus);
       const codes = resolved ? (SUBJECTS[resolved] || []) : [];
+      const _live = scopeLiveCourses(u, resolved);
 
       courses.push({
         providerCode: u.providerCode,
@@ -391,8 +412,10 @@ export const handler = async (event) => {
         // the university". liveCoursesPartial=true means the page's full list
         // is not fully server-rendered and only a subset was captured (the
         // live page link remains the authoritative source).
-        liveCourses: Array.isArray(u.liveCourses) && u.liveCourses.length ? u.liveCourses : null,
-        liveCoursesCount: u.liveCoursesCount != null ? Number(u.liveCoursesCount) : null,
+        liveCourses: _live.list,
+        liveCoursesCount: u.liveCoursesCount != null ? Number(u.liveCoursesCount) : (_live.list ? _live.list.length : null),
+        liveCoursesMatched: _live.matched,
+        liveCoursesTruncated: _live.truncated,
         liveCoursesSource: u.liveCoursesSource || null,
         liveCoursesFetchedAt: u.liveCoursesFetchedAt || null,
         liveCoursesPartial: !!u.liveCoursesPartial,
