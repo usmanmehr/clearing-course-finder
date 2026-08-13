@@ -3,6 +3,16 @@
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
+- Option B: ingested University of Lincoln (0082) with REAL per-course open/closed
+  Clearing status - 119 courses (113 open, 6 closed), each with status + UCAS tariff
+  + course link, from Lincoln's fully server-rendered list. This is the first source
+  with genuine per-course availability. Frontend now renders an Open/Closed pill per
+  course (closed courses shown, not hidden, and visually muted) and includes the
+  tariff. Also corrected Lincoln's stale university-level clearingStatus from
+  "Opens 13 Aug" to "Open" (verified: 113 courses live-open) in the live table +
+  seed.py. Added a Lincoln parser to ingest_live_courses.py. Deployed
+  app.js?v=cec02ff0df, styles.css?v=76b12937eb. No Lambda change (liveCourses,
+  including per-course status/tariff, passes through SearchCourses generically).
 - Tooling: added scripts/recheck_status.py, a READ-ONLY sweep that fetches every
   participating university's clearingPage, detects OPEN/CLOSED text signals and
   flags stored clearingStatus values that look stale. First run (13 Aug) found 0
