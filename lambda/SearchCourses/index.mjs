@@ -532,6 +532,7 @@ export const handler = async (event) => {
       queryId,
       searchTimeMs: totalLatencyMs,
       dataFreshness: new Date().toISOString(),
+      resolvedCourseInterest: resolved || null,
       usingCachedData: false,
       estimatedData: true,
       notice: 'Salary shown is the national median for the subject (HESA Graduate Outcomes 2022/23), not a university-specific figure - it does not vary by university. Graduate prospects, where shown, are from the Complete University Guide 2027 and do vary by university. Live UCAS clearing vacancies are confirmed by phone on Results Day (Thursday 13 August 2026).',
