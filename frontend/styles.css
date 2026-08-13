@@ -557,3 +557,45 @@ button:active { transform: translateY(1px); }
 }
 .live-cta:hover { filter: brightness(1.06); text-decoration: none; }
 .live-cta:focus-visible { outline: 2px solid var(--amber-ink); outline-offset: 2px; }
+
+/* Option B - expandable per-course live Clearing listings (scraped from the
+   university's own page, with source + fetch timestamp). */
+.live-courses {
+  margin: 0.6rem 0 0.2rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-tint);
+  padding: 0.15rem 0.7rem;
+}
+.live-courses > summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--brand-strong);
+  padding: 0.5rem 0.1rem;
+  list-style-position: inside;
+}
+.live-courses > summary:hover { filter: brightness(1.05); }
+.live-courses[open] > summary { border-bottom: 1px solid var(--border); margin-bottom: 0.4rem; }
+.live-src {
+  font-size: 0.86rem;
+  color: var(--muted);
+  margin: 0.2rem 0 0.5rem;
+  line-height: 1.4;
+}
+.live-partial { margin: 0.35rem 0 0.55rem; }
+.live-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 24rem;
+  overflow-y: auto;
+}
+.live-list li {
+  padding: 0.32rem 0.1rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.95rem;
+}
+.live-list li:last-child { border-bottom: none; }
+.live-list a { color: var(--ink); font-weight: 600; text-decoration: none; }
+.live-list a:hover { color: var(--brand); text-decoration: underline; }
+.lc-meta { color: var(--muted); font-size: 0.82rem; font-weight: 400; }
