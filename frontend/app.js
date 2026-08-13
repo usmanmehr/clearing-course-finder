@@ -48,6 +48,10 @@ const BADGE_COLOURS = { Green: 'Green', Amber: 'Amber', Red: 'Red' };
 
 let lastResults = [];
 let shown = 0;
+// The server-resolved course subject for the current results (e.g. "Economics"),
+// or null when the student left "what do you want to study?" blank. Used to
+// filter each university's live Clearing course list to matching courses.
+let searchedSubject = null;
 let subjectNames = []; // full subject list, loaded once, used for "did you mean"
 
 const el = (id) => document.getElementById(id);
@@ -335,16 +339,43 @@ function liveCoursesBlock(c) {
   if (!Array.isArray(c.liveCourses) || !c.liveCourses.length) return '';
   const src = safeHttpsUrl(c.liveCoursesSource);
   const fetched = fmtFetched(c.liveCoursesFetchedAt);
-  const count = c.liveCoursesCount != null ? c.liveCoursesCount : c.liveCourses.length;
+  const total = c.liveCoursesCount != null ? c.liveCoursesCount : c.liveCourses.length;
   const srcLink = src
     ? `<a href="${escapeHtml(src)}" target="_blank" rel="noopener">the university's live Clearing page</a>`
     : "the university's live Clearing page";
+
+  // Filter to the subject the student searched, when they gave one. Matching
+  // is a case-insensitive substring of the resolved subject in the course
+  // title (so "Economics" matches "Economics", "Economics and Finance",
+  // "Politics and Economics"). If the student searched nothing, or nothing
+  // matches, we fall back to the full list rather than hiding real courses -
+  // and say so, so the count is never misread as "only these exist".
+  const subj = (searchedSubject || '').trim().toLowerCase();
+  let shownCourses = c.liveCourses;
+  let filtered = false;
+  let noMatch = false;
+  if (subj) {
+    const matches = c.liveCourses.filter((lc) => (lc.title || '').toLowerCase().includes(subj));
+    if (matches.length) {
+      shownCourses = matches;
+      filtered = true;
+    } else {
+      noMatch = true; // keep the full list, but flag that none matched
+    }
+  }
+
   const provenance = `<div class="live-src">Scraped from ${srcLink}${fetched ? ` - fetched ${escapeHtml(fetched)}` : ''}. `
     + `Clearing vacancies can change within the hour on Results Day - always confirm the course is still open with the university before applying.</div>`;
   const partial = c.liveCoursesPartial
     ? `<div class="warn live-partial">${escapeHtml(c.liveCoursesPartialNote || 'This is only a sample of this university\u2019s Clearing courses. Open the live page above for the full list.')}</div>`
     : '';
-  const items = c.liveCourses.map((lc) => {
+  const matchNote = filtered
+    ? `<div class="live-src">Showing the ${shownCourses.length} of ${escapeHtml(total)} live Clearing course${total === 1 ? '' : 's'} matching \u201c${escapeHtml(searchedSubject)}\u201d. See the live page above for every course.</div>`
+    : (noMatch
+        ? `<div class="live-src">None of the ${escapeHtml(total)} live Clearing courses here match \u201c${escapeHtml(searchedSubject)}\u201d - showing all of them below. Check the live page for the latest.</div>`
+        : '');
+
+  const items = shownCourses.map((lc) => {
     const bits = [];
     if (lc.degree) bits.push(escapeHtml(lc.degree));
     if (lc.ucasCode) bits.push(`UCAS ${escapeHtml(lc.ucasCode)}`);
@@ -359,12 +390,19 @@ function liveCoursesBlock(c) {
       : escapeHtml(lc.title);
     return `<li>${title}${meta}</li>`;
   }).join('');
-  const label = c.liveCoursesPartial
-    ? `View a sample of live Clearing courses (${escapeHtml(count)} shown)`
-    : `View ${escapeHtml(count)} live Clearing courses`;
-  return `<details class="live-courses">
+
+  let label;
+  if (filtered) {
+    label = `View ${shownCourses.length} live Clearing course${shownCourses.length === 1 ? '' : 's'} matching \u201c${escapeHtml(searchedSubject)}\u201d`;
+  } else if (c.liveCoursesPartial) {
+    label = `View a sample of live Clearing courses (${escapeHtml(total)} shown)`;
+  } else {
+    label = `View ${escapeHtml(total)} live Clearing courses`;
+  }
+  return `<details class="live-courses"${filtered ? ' open' : ''}>
       <summary>${label}</summary>
       ${provenance}
+      ${matchNote}
       ${partial}
       <ul class="live-list">${items}</ul>
     </details>`;
@@ -624,6 +662,7 @@ async function onSubmit(e) {
     }
     updateShareUrl(payload);
     lastResults = data.results || [];
+    searchedSubject = data.resolvedCourseInterest || null;
     shown = 0;
     el('results').innerHTML = '';
     renderSalaryBanner(data.salaryContext);
