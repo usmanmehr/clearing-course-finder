@@ -3,6 +3,12 @@
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
+- Clearing Day: added a prominent "View live Clearing courses →" CTA on each
+  result card, linking straight to the university's live Clearing page (shown when
+  the URL is usable; unreachable falls back to phone-first). Upgraded Reading and
+  Southampton clearingPage to their verified course-listing pages
+  (reading.ac.uk/clearing/available-courses, southampton.ac.uk/clearing/course-vacancies)
+  in the live table + seed.py. Deployed app.js?v=01517d8d42, styles.css?v=58f306d6d1.
 - CI/process: adopted GitHub Flow (main + short-lived feature/* branches; develop
   removed), added a CI-on-PR workflow (.github/workflows/ci.yml: terraform
   fmt/validate, secret scan, JS syntax check - no AWS creds), and switched release
