@@ -341,17 +341,17 @@ function courseCard(c) {
   //    specifically (likely anti-bot, not necessarily broken for a real
   //    browser) - keep the link but add a softer heads-up.
   //  - anything else ('ok', or no data yet): show the link as normal.
-  let page = '';
+  let cta = '';
   let pageWarn = '';
   const url = safeClearingUrl(c.clearingPage);
   if (url) {
     if (c.clearingPageState === 'unreachable') {
       pageWarn = '<div class="warn">Our last automated check could not load this university\'s clearing page - it may have moved. Use the phone number above instead.</div>';
     } else if (c.clearingPageState === 'blocked') {
-      page = `<a href="${escapeHtml(url)}" target="_blank" rel="noopener">Clearing page</a>`;
+      cta = `<div class="cta-row"><a class="live-cta" href="${escapeHtml(url)}" target="_blank" rel="noopener">View live Clearing courses \u2192</a></div>`;
       pageWarn = '<div class="note-line">Our automated check could not confirm this link is working, but it may just be blocking automated visits - it may still work fine in your browser.</div>';
     } else {
-      page = `<a href="${escapeHtml(url)}" target="_blank" rel="noopener">Clearing page</a>`;
+      cta = `<div class="cta-row"><a class="live-cta" href="${escapeHtml(url)}" target="_blank" rel="noopener">View live Clearing courses \u2192</a></div>`;
     }
   } else if (c.clearingPage) {
     // We had a value but it failed https validation - never render it as a link.
@@ -394,6 +394,7 @@ function courseCard(c) {
     <h3>${escapeHtml(c.universityName)}</h3>
     <div class="meta">${escapeHtml(c.courseTitle)}${c.ucasCode ? ` \u00b7 UCAS ${escapeHtml(c.ucasCode)}` : ''} \u00b7 ${escapeHtml(c.location)} \u00b7
       <span class="badge ${badgeColour}">${escapeHtml(badge.label)}</span>${est}</div>
+    ${cta}
     <div class="stat-row">
       ${stats.join('\n      ')}
     </div>
@@ -401,7 +402,7 @@ function courseCard(c) {
     ${sourceLine}
     ${warn}
     ${driftWarn}
-    <div class="contact">Clearing: ${phone} ${page ? '\u00b7 ' + page : ''}
+    <div class="contact">Clearing hotline: ${phone}
       ${c.hotlineOpens ? `<br>Hotline: ${escapeHtml(c.hotlineOpens)}` : ''}</div>
     ${pageWarn}
   </article>`;
