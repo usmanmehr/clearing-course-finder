@@ -33,6 +33,7 @@ No boto3 list-marshalling surprises - uses the boto3 resource (Table) API.
 import argparse
 import html
 import json
+import os
 import re
 import sys
 import urllib.parse
@@ -486,6 +487,113 @@ def write_ddb(table_name, provider_code, site, courses, fetched_at):
         ExpressionAttributeNames=expr_names,
         ExpressionAttributeValues=expr_vals,
     )
+
+
+# ===========================================================================
+# AWS Lambda entry point - lets a scheduled Lambda re-run the SAME verified
+# parsers through Clearing so the 8 universities' course lists (and Lincoln /
+# Loughborough per-course open/closed status) stay fresh, updating
+# liveCoursesFetchedAt each run. Reuses fetch() + the SITES parsers + write_ddb
+# above, so there is no second, unverified copy of the parsing logic.
+#
+# SAFETY FLOOR (critical): a scheduled writer must never wipe good data if a
+# university changes its markup and a parser suddenly returns 0 / a collapsed
+# count. So before writing we compare the fresh parse against the stored count
+# and SKIP the write (keeping the last good data) when the parse looks broken.
+# ===========================================================================
+_NS = "ClearingAdvisor"
+
+
+def _emit(cw, name, value, dims=None):
+    try:
+        md = {"MetricName": name, "Value": value, "Unit": "Count"}
+        if dims:
+            md["Dimensions"] = [{"Name": k, "Value": v} for k, v in dims.items()]
+        cw.put_metric_data(Namespace=_NS, MetricData=[md])
+    except Exception:  # noqa: BLE001 - metrics are best-effort
+        pass
+
+
+def _existing_count(table, code):
+    try:
+        r = table.get_item(Key={"providerCode": code},
+                           ProjectionExpression="liveCoursesCount")
+        v = (r.get("Item") or {}).get("liveCoursesCount")
+        return int(v) if v is not None else 0
+    except Exception:  # noqa: BLE001
+        return 0
+
+
+def _looks_broken(parsed, existing):
+    """True when a fresh parse should NOT overwrite stored data."""
+    if parsed == 0:
+        return True
+    # Course counts legitimately drift as places fill, but a healthy list does
+    # not collapse to under 40% of its previous size between runs - that is a
+    # parser/markup break, not real attrition.
+    if existing >= 20 and parsed < 0.4 * existing:
+        return True
+    return False
+
+
+def handler(event, context):  # noqa: ARG001 - Lambda signature
+    import boto3
+    table_name = os.environ.get("CONTACTS_TABLE") or DEFAULT_TABLE
+    only = (event or {}).get("only")
+    codes = ([c.strip() for c in only.split(",")] if isinstance(only, str) and only
+             else list(SITES))
+    ddb = boto3.resource("dynamodb")
+    table = ddb.Table(table_name)
+    cw = boto3.client("cloudwatch")
+    fetched_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    def work(code):
+        site = SITES.get(code)
+        if not site:
+            return code, None, "no parser configured", None
+        try:
+            page = fetch(site["url"])
+            return code, site, None, site["parser"](page)
+        except Exception as e:  # noqa: BLE001
+            return code, site, "%s: %s" % (type(e).__name__, str(e)[:120]), None
+
+    results = {"written": {}, "skipped": {}, "errors": {}}
+    parsed_map = {}
+    from concurrent.futures import ThreadPoolExecutor, as_completed
+    with ThreadPoolExecutor(max_workers=5) as ex:
+        for fut in as_completed([ex.submit(work, c) for c in codes]):
+            code, site, err, courses = fut.result()
+            parsed_map[code] = (site, err, courses)
+
+    for code in codes:
+        site, err, courses = parsed_map.get(code, (None, "missing", None))
+        name = (site or {}).get("name", code)
+        if err:
+            results["errors"][code] = err
+            _emit(cw, "CourseIngestErrors", 1, {"University": name})
+            continue
+        parsed = len(courses)
+        existing = _existing_count(table, code)
+        if _looks_broken(parsed, existing):
+            results["skipped"][code] = {"parsed": parsed, "existing": existing,
+                                        "reason": "count collapsed - kept last good data"}
+            _emit(cw, "CourseIngestSkipped", 1, {"University": name})
+            continue
+        try:
+            write_ddb(table_name, code, site, courses, fetched_at)
+            results["written"][code] = parsed
+            _emit(cw, "CourseIngestWritten", parsed, {"University": name})
+        except Exception as e:  # noqa: BLE001
+            results["errors"][code] = "write: %s" % (str(e)[:120])
+            _emit(cw, "CourseIngestErrors", 1, {"University": name})
+
+    _emit(cw, "CourseIngestRun", 1)
+    summary = {"fetchedAt": fetched_at,
+               "written": results["written"],
+               "skipped": results["skipped"],
+               "errors": results["errors"]}
+    print(json.dumps({"level": "INFO", "msg": "course-ingest complete", **summary}))
+    return summary
 
 
 def main():
