@@ -3,6 +3,14 @@
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
+- Option B: the live Clearing course list now filters to the student's searched
+  subject. When a course interest is given, each university's block shows only
+  matching courses (opened by default) labelled "N of TOTAL matching '<subject>'";
+  when nothing matches it falls back to the full list with a clear note so the
+  count is never misread as "only these exist"; a blank course interest shows the
+  full list as before. Matching is client-side (case-insensitive title contains)
+  against the server-resolved subject, newly exposed as resolvedCourseInterest by
+  SearchCourses (v10). Deployed app.js?v=1882b12c13.
 - Clearing Day (Option B - live per-course listings): ingested real, server-rendered
   Clearing course listings into the app for universities that publish a
   machine-readable list. University of Manchester (132 courses: title, degree, UCAS
