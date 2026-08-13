@@ -26,6 +26,7 @@ digraph clearing_course_finder {
     ddb  [label="DynamoDB\nreference tables + TTL caches", shape="cylinder", fillcolor="#dff0df", color="#4c8c4a"];
     sm   [label="Secrets Manager\norigin-verify secret", fillcolor="#dff0df", color="#4c8c4a"];
     scr  [label="DailyScraper Lambda\n(EventBridge schedule)", fillcolor="#dff0df", color="#4c8c4a"];
+    ci   [label="CourseIngest Lambda\nPython 3.12 - EventBridge every 2h\nscrapes live course lists\n(safety floor, retry + DLQ)", fillcolor="#dff0df", color="#4c8c4a"];
     dash [label="CloudWatch\noverview dashboard", fillcolor="#dff0df", color="#4c8c4a"];
   }
 
@@ -46,6 +47,7 @@ digraph clearing_course_finder {
   lam -> ddb;
   lam -> sm  [label="read secret", style="dashed"];
   scr -> ddb [label="daily refresh"];
+  ci  -> ddb [label="live courses / 2h"];
   canary -> cf [label="every 60s"];
   canary -> cw;
   cw -> sns;
