@@ -3,6 +3,25 @@
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
+- Option B: ingested live per-course Clearing listings for 5 more universities
+  (verified server-rendered lists, counts parsed not estimated): UCL (245),
+  Lancaster (361, +A-level/BTEC grades), Leeds (308, +entry requirements),
+  Loughborough (274, via its JSON feed - carries real per-course open/closed
+  status), Liverpool (28, +typical offer). Live per-course data now covers 8
+  universities. Investigated 9 candidates in parallel; skipped Brunel/Surrey/
+  Newcastle (JS/no server-rendered list) and Heriot-Watt (stored URL was a single
+  course page). New parsers added to ingest_live_courses.py (+ per-site source_url
+  for the student-facing link).
+- Option B (scaling fix): SearchCourses (v11) now bounds the live-course payload -
+  it filters each university's list to the searched subject over the FULL stored
+  list server-side, then caps at 60, and returns liveCoursesMatched /
+  liveCoursesTruncated / liveCoursesCount. Previously it attached each university's
+  entire list, which with the larger ingest could have produced multi-MB responses
+  and exceeded DynamoDB's 400KB query-cache item limit (worst-case no-subject
+  limit-50 response is now ~134KB). Frontend rewritten to render the server-scoped
+  list with accurate "N matching / none match / showing X of TOTAL" labels, an
+  Open/Closed pill per course where published, and an Entry-requirements line
+  (Leeds). Deployed app.js?v=51c1231fc9.
 - Option B: ingested University of Lincoln (0082) with REAL per-course open/closed
   Clearing status - 119 courses (113 open, 6 closed), each with status + UCAS tariff
   + course link, from Lincoln's fully server-rendered list. This is the first source
