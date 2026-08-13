@@ -22,6 +22,7 @@ flowchart TB
   lam --> sm[Secrets Manager<br/>origin-verify secret]
 
   scraper[DailyScraper Lambda<br/>EventBridge schedule] --> ddb
+  ingest[CourseIngest Lambda<br/>Python 3.12, EventBridge every 2h<br/>scrapes live course lists] --> ddb
 
   subgraph mon[Monitoring]
     canary[Canary EC2 t3.micro<br/>2nd region, WAF-allowlisted IP] -->|every 60s| cf
@@ -51,8 +52,9 @@ flowchart TB
 | Edge | CloudFront (GB geo-restriction) + AWS WAF (rate limit, Core Rule Set in block mode, known-bad-inputs, SQLi) |
 | Site | Private S3 bucket served via CloudFront Origin Access Control; strong CSP/HSTS response headers |
 | API | HTTP API Gateway; the SPA calls `/api/*` same-origin through CloudFront; CloudFront sends an `X-Origin-Verify` header to the API origin |
-| Compute | Node.js 22 Lambdas on arm64; a published version + `live` alias; async functions have an SQS dead-letter queue |
+| Compute | Node.js 22 Lambdas on arm64; a published version + `live` alias; async functions have an SQS dead-letter queue. Plus one Python 3.12 Lambda (`CourseIngest`) for live course-list scraping |
 | Data | DynamoDB reference tables (PITR) and TTL cache tables; least-privilege per-function IAM scoped to exact table ARNs |
+| Live courses | `CourseIngest` (Python 3.12) re-runs the verified per-university parsers on an EventBridge schedule (every 2h through Clearing, retry + DLQ, kill-switch aware) and writes per-course listings onto each university's DynamoDB item, with a source URL + fetch timestamp and per-course open/closed status where the source publishes it. A safety floor skips a write if a fresh parse returns zero or collapses versus the stored count, so a broken parser can never wipe live data. `SearchCourses` filters this list to the searched subject (server-side) and caps it before returning |
 | Secrets | Origin-verify secret generated at deploy time, stored in Secrets Manager |
 | Monitoring | Synthetic canary (t3.micro) every 60s, CloudWatch alarm -> SNS email, overview dashboard |
 | Optional full scope | CloudWatch observability, Results-Day autoscaling, Grafana analytics |
