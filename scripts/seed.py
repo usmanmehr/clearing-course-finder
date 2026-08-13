@@ -81,7 +81,7 @@ UNIVERSITIES = [
     ("0019","Aston University","A80","England","Birmingham",False,None,"Not listed","+44 (0)121 204 3000","admissions@aston.ac.uk","aston.ac.uk/clearing","08:00 BST 13 Aug 2026","Opens 13 Aug",False,None),
     ("0090","University of Aberdeen","A20","Scotland","Aberdeen",False,None,"Not listed","+44 (0)1224 272090","sras@abdn.ac.uk","abdn.ac.uk/clearing/","08:00 BST 13 Aug 2026","Opens 13 Aug",False,None),
     ("0031","University of Dundee","D65","Scotland","Dundee",False,None,"Not listed","+44 (0)1382 383000","uni-admissions@dundee.ac.uk","dundee.ac.uk/clearing","08:00 BST 13 Aug 2026","Opens 13 Aug",False,None),
-    ("0082","University of Lincoln","L43","England","Lincoln",False,None,"Not listed","+44 (0)1522 886097","admissions@lincoln.ac.uk","lincoln.ac.uk/clearing","08:00 BST 13 Aug 2026","Opens 13 Aug",False,None),
+    ("0082","University of Lincoln","L43","England","Lincoln",False,None,"Not listed","+44 (0)1522 886097","admissions@lincoln.ac.uk","lincoln.ac.uk/clearing","08:00 BST 13 Aug 2026","Open",False,None),
     ("0029","Coventry University","C85","England","Coventry",False,None,"Not listed","+44 (0)24 7765 2222","admissions@coventry.ac.uk","coventry.ac.uk/clearing/","OPEN NOW","Open",False,None),
     ("0013","Brunel University London","B84","England","London (Uxbridge)",False,None,"Not listed","+44 (0)1895 265265","admissions@brunel.ac.uk","brunel.ac.uk/clearing","08:00 BST 13 Aug 2026","Opens 13 Aug",False,None),
     ("0043","University of Essex","E70","England","Colchester",False,None,"Not listed","+44 (0)1206 873666","admit@essex.ac.uk","essex.ac.uk/clearing","08:00 BST 13 Aug 2026","Opens 13 Aug",False,None),
