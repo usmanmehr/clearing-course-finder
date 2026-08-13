@@ -3,6 +3,23 @@
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
+- Clearing Day (Option B - live per-course listings): ingested real, server-rendered
+  Clearing course listings into the app for universities that publish a
+  machine-readable list. University of Manchester (132 courses: title, degree, UCAS
+  code, course link) and University of Reading (10 courses with A-level/BTEC/IB
+  requirements - flagged as a partial sample, since Reading's full ~297 load via a
+  Sitecore AJAX endpoint). Stored on each university's DynamoDB item as liveCourses
+  + liveCoursesCount + liveCoursesSource + liveCoursesFetchedAt + liveCoursesPartial;
+  SearchCourses (v9) attaches these to results; the frontend renders an expandable
+  "View N live Clearing courses" block with source + fetch timestamp, a
+  "confirm with the university" caveat, and a partial-list banner where applicable.
+  Deployed app.js?v=bfbbf1b358, styles.css?v=7b7890b24c. New reproducible scripts:
+  scripts/ingest_live_courses.py (parses + writes verified listings; --dry-run
+  supported) and scripts/discover_live_courses.py (classification sweep across all
+  participating universities - writes nothing; logs ingest-candidate/no-list/
+  blocked/unreachable per university). No fabricated data: counts come from the
+  parse, every listing carries its source + fetch time, and only unambiguous
+  server-rendered lists are ingested.
 - Clearing Day: added a prominent "View live Clearing courses →" CTA on each
   result card, linking straight to the university's live Clearing page (shown when
   the URL is usable; unreachable falls back to phone-first). Upgraded Reading and
