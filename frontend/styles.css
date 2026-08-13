@@ -543,3 +543,17 @@ button:active { transform: translateY(1px); }
 .clear-input.is-visible { display: inline-flex; }
 .clear-input:hover { color: var(--red-ink); }
 .clear-input:focus-visible { outline: 2px solid var(--amber-ink); border-radius: 4px; }
+
+/* Prominent "View live Clearing courses" call-to-action on each result card */
+.cta-row { margin: 0.55rem 0 0.15rem; }
+.live-cta {
+  display: inline-block;
+  background: var(--brand);
+  color: var(--on-brand);
+  font-weight: 700;
+  padding: 0.5rem 0.9rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+}
+.live-cta:hover { filter: brightness(1.06); text-decoration: none; }
+.live-cta:focus-visible { outline: 2px solid var(--amber-ink); outline-offset: 2px; }
