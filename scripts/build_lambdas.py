@@ -40,6 +40,16 @@ def build():
             z.write(src, "index.mjs")
         print("Built %s (%d bytes)" % (zip_path, os.path.getsize(zip_path)))
 
+    # CourseIngest is a PYTHON 3.12 Lambda that reuses the verified scrapers in
+    # scripts/ingest_live_courses.py (handler = ingest_live_courses.handler).
+    # Packaging the exact same file used by the CLI means there is no second,
+    # unverified copy of the parsing logic. boto3 is in the Lambda runtime.
+    ci_src = os.path.join(ROOT, "scripts", "ingest_live_courses.py")
+    ci_zip = os.path.join(OUT, "CourseIngest.zip")
+    with zipfile.ZipFile(ci_zip, "w", zipfile.ZIP_DEFLATED) as z:
+        z.write(ci_src, "ingest_live_courses.py")
+    print("Built %s (%d bytes)" % (ci_zip, os.path.getsize(ci_zip)))
+
 
 if __name__ == "__main__":
     build()
