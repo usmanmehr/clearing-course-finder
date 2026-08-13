@@ -3,6 +3,20 @@
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
+- Option B (freshness): added a scheduled CourseIngest Lambda so the 8 parseable
+  universities' live course lists - and Lincoln/Loughborough per-course open/closed
+  status - auto-refresh through Clearing instead of being a one-off snapshot. It is
+  a Python 3.12 Lambda that reuses the SAME verified parsers in
+  scripts/ingest_live_courses.py (handler ingest_live_courses.handler - no second
+  copy of the logic), invoked every 2 hours until 2026-08-31 via EventBridge
+  Scheduler (retry 3/3600s + DLQ, kill-switch aware). SAFETY FLOOR: the handler
+  reads the stored count first and SKIPS the write (keeping the last good data,
+  emitting CourseIngestSkipped) if a fresh parse returns 0 or collapses below 40%
+  of the stored count - so a markup change or Lambda-IP block can never wipe live
+  course data on an unattended run. New Terraform module terraform/modules/
+  course-ingest (Lambda + scoped IAM + scheduler + DLQ); build_lambdas.py now also
+  packages build/CourseIngest.zip. First invocation re-ingested all 8 universities
+  cleanly (132/119/10/245/361/308/274/28, 0 skipped, 0 errors).
 - Option B: ingested live per-course Clearing listings for 5 more universities
   (verified server-rendered lists, counts parsed not estimated): UCL (245),
   Lancaster (361, +A-level/BTEC grades), Leeds (308, +entry requirements),
