@@ -336,46 +336,38 @@ function fmtFetched(iso) {
 // full list is JS/AJAX-driven), a prominent note says so and the live page
 // stays the authoritative source.
 function liveCoursesBlock(c) {
-  if (!Array.isArray(c.liveCourses) || !c.liveCourses.length) return '';
+  // c.liveCourses is already SCOPED by the server: when the student searched a
+  // subject it holds the matching courses (capped), otherwise a capped sample
+  // of the whole list. c.liveCoursesMatched is the match total (null when no
+  // subject searched, 0 when a subject matched nothing); c.liveCoursesCount is
+  // the university's grand total; c.liveCoursesTruncated flags that the shown
+  // set was capped. So no client-side filtering is needed here.
+  const list = c.liveCourses;
+  if (!Array.isArray(list)) return ''; // null => no live-course data for this uni
   const src = safeHttpsUrl(c.liveCoursesSource);
   const fetched = fmtFetched(c.liveCoursesFetchedAt);
-  const total = c.liveCoursesCount != null ? c.liveCoursesCount : c.liveCourses.length;
+  const total = c.liveCoursesCount != null ? c.liveCoursesCount : list.length;
+  const matched = c.liveCoursesMatched; // null | number
   const srcLink = src
     ? `<a href="${escapeHtml(src)}" target="_blank" rel="noopener">the university's live Clearing page</a>`
     : "the university's live Clearing page";
-
-  // Filter to the subject the student searched, when they gave one. Matching
-  // is a case-insensitive substring of the resolved subject in the course
-  // title (so "Economics" matches "Economics", "Economics and Finance",
-  // "Politics and Economics"). If the student searched nothing, or nothing
-  // matches, we fall back to the full list rather than hiding real courses -
-  // and say so, so the count is never misread as "only these exist".
-  const subj = (searchedSubject || '').trim().toLowerCase();
-  let shownCourses = c.liveCourses;
-  let filtered = false;
-  let noMatch = false;
-  if (subj) {
-    const matches = c.liveCourses.filter((lc) => (lc.title || '').toLowerCase().includes(subj));
-    if (matches.length) {
-      shownCourses = matches;
-      filtered = true;
-    } else {
-      noMatch = true; // keep the full list, but flag that none matched
-    }
-  }
-
   const provenance = `<div class="live-src">Scraped from ${srcLink}${fetched ? ` - fetched ${escapeHtml(fetched)}` : ''}. `
     + `Clearing vacancies can change within the hour on Results Day - always confirm the course is still open with the university before applying.</div>`;
   const partial = c.liveCoursesPartial
     ? `<div class="warn live-partial">${escapeHtml(c.liveCoursesPartialNote || 'This is only a sample of this university\u2019s Clearing courses. Open the live page above for the full list.')}</div>`
     : '';
-  const matchNote = filtered
-    ? `<div class="live-src">Showing the ${shownCourses.length} of ${escapeHtml(total)} live Clearing course${total === 1 ? '' : 's'} matching \u201c${escapeHtml(searchedSubject)}\u201d. See the live page above for every course.</div>`
-    : (noMatch
-        ? `<div class="live-src">None of the ${escapeHtml(total)} live Clearing courses here match \u201c${escapeHtml(searchedSubject)}\u201d - showing all of them below. Check the live page for the latest.</div>`
-        : '');
 
-  const items = shownCourses.map((lc) => {
+  // Subject searched, but nothing at this university matched: say so plainly
+  // (no list), and keep the live-page link as the way to see everything.
+  if (matched === 0) {
+    return `<details class="live-courses">
+      <summary>No live Clearing courses here match \u201c${escapeHtml(searchedSubject || '')}\u201d</summary>
+      ${provenance}
+      <div class="live-src">None of the ${escapeHtml(total)} live Clearing course${total === 1 ? '' : 's'} at this university match \u201c${escapeHtml(searchedSubject || '')}\u201d. Open the live page above to browse them all.</div>
+    </details>`;
+  }
+
+  const items = list.map((lc) => {
     const bits = [];
     if (lc.degree) bits.push(escapeHtml(lc.degree));
     if (lc.ucasCode) bits.push(`UCAS ${escapeHtml(lc.ucasCode)}`);
@@ -384,10 +376,11 @@ function liveCoursesBlock(c) {
     if (lc.btec) bits.push(`BTEC ${escapeHtml(lc.btec)}`);
     if (lc.ib) bits.push(`IB ${escapeHtml(lc.ib)}`);
     if (lc.tariff) bits.push(escapeHtml(lc.tariff));
+    if (lc.entry) bits.push(`Entry: ${escapeHtml(lc.entry)}`);
     const meta = bits.length ? ` <span class="lc-meta">${bits.join(' \u00b7 ')}</span>` : '';
-    // Real per-course Clearing status, where the source publishes it (e.g.
-    // Lincoln). "closed" courses are shown - not hidden - so a student knows
-    // this specific course is full, rather than being left to guess.
+    // Real per-course Clearing status, where the source publishes it (Lincoln,
+    // Loughborough). "closed" courses are shown - not hidden - so a student
+    // knows this specific course is full rather than being left to guess.
     const status = lc.status === 'open'
       ? '<span class="lc-status open">Open</span> '
       : (lc.status === 'closed' ? '<span class="lc-status closed">Closed</span> ' : '');
@@ -399,17 +392,24 @@ function liveCoursesBlock(c) {
   }).join('');
 
   let label;
-  if (filtered) {
-    label = `View ${shownCourses.length} live Clearing course${shownCourses.length === 1 ? '' : 's'} matching \u201c${escapeHtml(searchedSubject)}\u201d`;
+  let note = '';
+  if (matched != null) {
+    label = `View ${matched} live Clearing course${matched === 1 ? '' : 's'} matching \u201c${escapeHtml(searchedSubject)}\u201d`;
+    if (c.liveCoursesTruncated) {
+      note = `<div class="live-src">Showing the first ${list.length} matches - open the live page above for the rest.</div>`;
+    }
   } else if (c.liveCoursesPartial) {
-    label = `View a sample of live Clearing courses (${escapeHtml(total)} shown)`;
+    label = `View a sample of live Clearing courses (${list.length} shown of many)`;
+  } else if (c.liveCoursesTruncated) {
+    label = `View live Clearing courses (${list.length} of ${escapeHtml(total)} shown)`;
+    note = `<div class="live-src">Showing ${list.length} of ${escapeHtml(total)} - enter a subject above to narrow, or open the live page for all.</div>`;
   } else {
-    label = `View ${escapeHtml(total)} live Clearing courses`;
+    label = `View ${escapeHtml(total)} live Clearing course${total === 1 ? '' : 's'}`;
   }
-  return `<details class="live-courses"${filtered ? ' open' : ''}>
+  return `<details class="live-courses"${matched != null ? ' open' : ''}>
       <summary>${label}</summary>
       ${provenance}
-      ${matchNote}
+      ${note}
       ${partial}
       <ul class="live-list">${items}</ul>
     </details>`;
