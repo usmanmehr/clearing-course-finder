@@ -3,6 +3,10 @@
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
+- Docs: updated ARCHITECTURE.md (Mermaid + Components table) and architecture.dot
+  / architecture.png to include the CourseIngest Lambda (Python 3.12, EventBridge
+  every 2h -> DynamoDB, retry + DLQ, safety floor) and the live per-course
+  ingestion flow, so the architecture artefacts match the deployed stack.
 - Option B (freshness): added a scheduled CourseIngest Lambda so the 8 parseable
   universities' live course lists - and Lincoln/Loughborough per-course open/closed
   status - auto-refresh through Clearing instead of being a one-off snapshot. It is
