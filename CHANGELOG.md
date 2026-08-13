@@ -3,6 +3,13 @@
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
+- Tooling: added scripts/recheck_status.py, a READ-ONLY sweep that fetches every
+  participating university's clearingPage, detects OPEN/CLOSED text signals and
+  flags stored clearingStatus values that look stale. First run (13 Aug) found 0
+  confirmed stale statuses beyond KCL - its two flags (Newcastle, Lincoln) were
+  false positives ("phone lines now closed" / per-course "Closed for Clearing"),
+  confirming automated closure detection is advisory only and JS-driven pages
+  hide status. No status changes made from this sweep.
 - Data correction (Clearing Day): King's College London (0072) marked clearingStatus
   "Closed" after it was reported closed - it was seeded "Open" on 31 July and the
   scraper never overwrites status, so it was stale. SearchCourses already skips
