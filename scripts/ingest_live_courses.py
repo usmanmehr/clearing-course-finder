@@ -171,7 +171,55 @@ def parse_reading(page_html):
 
 
 # ---------------------------------------------------------------------------
+# Lincoln - fully server-rendered, with REAL per-course open/closed status.
+# Each course:
+#   <div id="ID" class="clearingCourse uol-d-none" data-title="TITLE - BSc (Hons)">
+#     <h3>TITLE</h3>
+#     <p class="clearingStatus --open|--closed">Open|Closed for Clearing</p>
+#     <p><strong>Clearing offers from 56 UCAS Tariff Points</strong></p>
+#     <a href="/course/ID" ...>View Course</a>
+#   </div>
+# ---------------------------------------------------------------------------
+LINCOLN_URL = "https://www.lincoln.ac.uk/clearing/"
+
+_LINCOLN_OPEN = re.compile(
+    r'(<div id="[^"]*" class="clearingCourse uol-d-none" data-title="[^"]*">)')
+
+
+def parse_lincoln(page_html):
+    parts = _LINCOLN_OPEN.split(page_html)
+    courses = []
+    # parts = [pre, openTag1, chunk1, openTag2, chunk2, ...]
+    for i in range(1, len(parts), 2):
+        open_tag = parts[i]
+        chunk = parts[i + 1] if i + 1 < len(parts) else ""
+        dt = re.search(r'data-title="([^"]*)"', open_tag)
+        title = clean(dt.group(1)) if dt else None
+        if not title:
+            continue
+        course = {"title": title}
+        st = re.search(r'clearingStatus --(open|closed)', chunk)
+        if st:
+            course["status"] = st.group(1)
+        tar = re.search(r'Clearing offers from\s*([0-9]+)\s*UCAS Tariff Points', chunk, re.I)
+        if tar:
+            course["tariff"] = "from %s UCAS points" % tar.group(1)
+        href = re.search(r'<a\s+href="([^"]+)"', chunk)
+        if href:
+            course["url"] = urllib.parse.urljoin(LINCOLN_URL, href.group(1))
+        courses.append(course)
+    return courses
+
+
+# ---------------------------------------------------------------------------
 SITES = {
+    "0082": {  # University of Lincoln - real per-course open/closed status
+        "name": "University of Lincoln",
+        "url": LINCOLN_URL,
+        "parser": parse_lincoln,
+        "partial": False,
+        "partial_note": None,
+    },
     "0094": {  # University of Manchester
         "name": "University of Manchester",
         "url": MANCHESTER_URL,
