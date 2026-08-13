@@ -51,7 +51,7 @@ UNIVERSITIES = [
     ("0044","University of Exeter","E70","England","Exeter",True,None,"Tier 2","+44 (0)1392 72 72 72","ug-ad@exeter.ac.uk","exeter.ac.uk/clearing","OPEN NOW","Open",False,None),
     ("0054","University of Glasgow","G28","Scotland","Glasgow",True,None,"Not listed","+44 (0)141 330 6062","sras@glasgow.ac.uk","gla.ac.uk/study/clearing/","08:00 BST 13 Aug 2026","Opens 13 Aug",False,None),
     ("0060","Imperial College London","I50","England","London",True,3,"Tier 1","+44 (0)20 7589 5111","admissions@imperial.ac.uk","imperial.ac.uk/study/ug/clearing","08:00 BST 13 Aug 2026","Opens 13 Aug",False,"Imperial rarely clears. STEM-only."),
-    ("0072","King's College London","K60","England","London",True,11,"Tier 2","+44 (0)20 3858 1050","ug-admissions@kcl.ac.uk","kcl.ac.uk/clearing","08:00 BST 13 Aug 2026","Open",False,None),
+    ("0072","King's College London","K60","England","London",True,11,"Tier 2","+44 (0)20 3858 1050","ug-admissions@kcl.ac.uk","kcl.ac.uk/clearing","08:00 BST 13 Aug 2026","Closed",False,None),
     ("0077","University of Leeds","L23","England","Leeds",True,None,"Semi-target","+44 (0)113 243 1751","ugadmissions@leeds.ac.uk","leeds.ac.uk/clearing","Strategic Clearing OPEN NOW - deadline 9am 3 Aug 2026","Early Clearing",True,None),
     ("0078","University of Leicester","L34","England","Leicester",False,None,"Not listed","+44 (0)116 252 2522","admissions@leicester.ac.uk","le.ac.uk/clearing","08:00 BST 13 Aug 2026","Opens 13 Aug",False,None),
     ("0083","University of Liverpool","L41","England","Liverpool",True,None,"Not listed","+44 (0)151 794 2000","ugadmissions@liverpool.ac.uk","liverpool.ac.uk/clearing/","08:00 BST 13 Aug 2026","Opens 13 Aug",False,None),
