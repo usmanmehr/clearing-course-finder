@@ -3,6 +3,11 @@
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
+- Docs: added HANDOVER.md - a next-cycle handover for a successor engineer
+  (current state, how to operate, known issues/risks incl. the status-staleness
+  #1 risk, prioritised roadmap led by the UCAS feed, the university page-type
+  reference, and the accuracy principles). Account-specific IDs kept out (as
+  placeholders) so it is safe if the repo is ever made public.
 - Docs: updated ARCHITECTURE.md (Mermaid + Components table) and architecture.dot
   / architecture.png to include the CourseIngest Lambda (Python 3.12, EventBridge
   every 2h -> DynamoDB, retry + DLQ, safety floor) and the live per-course
