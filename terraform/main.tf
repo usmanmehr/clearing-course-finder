@@ -102,6 +102,19 @@ module "scraper_schedule" {
   target_lambda_arn = module.compute.dailyscraper_arn
 }
 
+# Course-ingest Lambda + schedule - re-runs the verified course-list parsers
+# through Clearing so live per-course data (and Lincoln/Loughborough open/closed
+# status) stays fresh. Safety floor prevents a broken parse from wiping data.
+module "course_ingest" {
+  source              = "./modules/course-ingest"
+  name_prefix         = var.name_prefix
+  lambda_architecture = var.lambda_architecture
+  contacts_table_name = module.data.table_names["CONTACTS_TABLE"]
+  contacts_table_arn  = module.data.table_arns["universities"]
+  metrics_namespace   = local.metrics_namespace
+  kill_switch         = var.kill_switch
+}
+
 module "canary" {
   source = "./modules/canary"
   count  = local.canary_count
