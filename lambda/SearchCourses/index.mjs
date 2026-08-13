@@ -382,6 +382,21 @@ export const handler = async (event) => {
         possibleStatusChange: !!u.possibleStatusChange,
         subjectWarning,
         notes: u.notes || null,
+        // Live per-course Clearing listings (Option B), ingested by
+        // scripts/ingest_live_courses.py from universities that publish a
+        // server-rendered, machine-readable course list. Present only for the
+        // pilot universities; null everywhere else. These are REAL scraped
+        // courses (never estimated) carrying their own source + fetch
+        // timestamp so the UI can label them "fetched <time> - confirm with
+        // the university". liveCoursesPartial=true means the page's full list
+        // is not fully server-rendered and only a subset was captured (the
+        // live page link remains the authoritative source).
+        liveCourses: Array.isArray(u.liveCourses) && u.liveCourses.length ? u.liveCourses : null,
+        liveCoursesCount: u.liveCoursesCount != null ? Number(u.liveCoursesCount) : null,
+        liveCoursesSource: u.liveCoursesSource || null,
+        liveCoursesFetchedAt: u.liveCoursesFetchedAt || null,
+        liveCoursesPartial: !!u.liveCoursesPartial,
+        liveCoursesPartialNote: u.liveCoursesPartialNote || null,
       });
     }
 
