@@ -212,11 +212,231 @@ def parse_lincoln(page_html):
 
 
 # ---------------------------------------------------------------------------
+# UCL - server-rendered <li><a href=".../degrees/...">DEGREE TITLE </a>- CODE</li>
+# ---------------------------------------------------------------------------
+UCL_URL = "https://www.ucl.ac.uk/study/prospective-students/undergraduate/clearing"
+_UCL_DEG = ('BASc', 'MSci', 'MEng', 'MArch', 'MBBS', 'LLB', 'BSc', 'BEng', 'BA', 'FdA', 'FdSc')
+_UCL_ROW = re.compile(
+    r'<li>\s*<a\s+href="(https://www\.ucl\.ac\.uk/[^"]*?/degrees/[^"]+)"\s*>(.*?)</a>\s*-\s*([A-Z0-9]{3,6})\b',
+    re.I | re.S)
+
+
+def parse_ucl(page_html):
+    courses, seen = [], set()
+    for m in _UCL_ROW.finditer(page_html):
+        url = m.group(1).strip()
+        title = clean(m.group(2))
+        code = m.group(3).strip()
+        if not title:
+            continue
+        key = (url, code)
+        if key in seen:
+            continue
+        seen.add(key)
+        c = {"title": title, "ucasCode": code, "url": url}
+        first = title.split(" ", 1)[0]
+        deg = next((d for d in _UCL_DEG if first.lower() == d.lower()), None)
+        if deg:
+            c["degree"] = deg
+        courses.append(c)
+    return courses
+
+
+# ---------------------------------------------------------------------------
+# Liverpool - server-rendered rb-card blocks at /clearing/courses/.
+# ---------------------------------------------------------------------------
+LIVERPOOL_URL = "https://www.liverpool.ac.uk/clearing/courses/"
+
+
+def parse_liverpool(page_html):
+    courses = []
+    for card in re.split(r'<section class="rb-card">', page_html)[1:]:
+        card = card.split("</section>", 1)[0]
+        mt = re.search(r'class="[^"]*coursename[^"]*"[^>]*>(.*?)</h3>', card, re.S)
+        if not mt:
+            continue
+        raw = mt.group(1)
+        msmall = re.search(r'<small[^>]*>(.*?)</small>', raw, re.S)
+        degree = clean(msmall.group(1)) if msmall else ""
+        title = clean(re.sub(r'<small[^>]*>.*?</small>', "", raw, flags=re.S))
+        if not title:
+            continue
+        c = {"title": title}
+        if degree:
+            c["degree"] = degree
+        mu = re.search(r'UCAS code:\s*<strong>(.*?)</strong>', card, re.S)
+        if mu:
+            c["ucasCode"] = clean(mu.group(1))
+        mo = re.search(r'Typical offer:\s*<strong>(.*?)</strong>', card, re.S)
+        if mo:
+            c["aLevel"] = clean(mo.group(1))
+        ml = re.search(r'href="(/courses/[^"#?]+)"', card)
+        if ml:
+            c["url"] = urllib.parse.urljoin(LIVERPOOL_URL, ml.group(1))
+        courses.append(c)
+    return courses
+
+
+# ---------------------------------------------------------------------------
+# Leeds - server-rendered <table class="uol-index-table"> rows at
+# /clearing/courses?l=uk. Columns: title(+link), UCAS, entry reqs, contextual, contact.
+# ---------------------------------------------------------------------------
+LEEDS_URL = "https://www.leeds.ac.uk/clearing/courses?l=uk"
+
+
+def parse_leeds(page_html):
+    courses = []
+    for row in re.findall(r'<tr\b.*?</tr>', page_html, re.S | re.I):
+        if "courses.leeds.ac.uk/202627/" not in row:
+            continue
+        tds = re.findall(r'<td\b[^>]*>(.*?)</td>', row, re.S | re.I)
+        if len(tds) < 3:
+            continue
+        a = re.search(r'<a\b[^>]*href="(https://courses\.leeds\.ac\.uk/[^"]+)"[^>]*>(.*?)</a>',
+                      tds[0], re.S | re.I)
+        title = clean(a.group(2)) if a else clean(tds[0])
+        if not title:
+            continue
+        c = {"title": title}
+        if a:
+            c["url"] = a.group(1)
+        ucas = clean(tds[1]) if len(tds) > 1 else ""
+        if ucas:
+            c["ucasCode"] = ucas
+        entry = clean(tds[2]) if len(tds) > 2 else ""
+        if entry:
+            c["entry"] = entry
+        dm = re.search(r'\b([A-Z][A-Za-z]{1,5}(?:\s?\(Hons\))?)\s*$', title)
+        if dm:
+            c["degree"] = dm.group(1)
+        courses.append(c)
+    return courses
+
+
+# ---------------------------------------------------------------------------
+# Lancaster - server-rendered accordion blocks at /study/clearing/courses/.
+#   <h3 id="CODE"><button>Name : Degree : CODE- GRADES</button></h3>
+#   <div id="panel-CODE"><p><strong>Clearing A level grades:</strong> ...</p>...</div>
+# ---------------------------------------------------------------------------
+LANCASTER_URL = "https://www.lancaster.ac.uk/study/clearing/courses/"
+_LANCS = re.compile(
+    r'<h3 id="([A-Za-z0-9]+)">\s*<button[^>]*>(.*?)</button>\s*</h3>'
+    r'\s*<div[^>]*id="panel-\1"[^>]*>(.*?)</div>\s*(?=<h3|<h2|</section|</div>\s*</div>)',
+    re.S)
+
+
+def _lancs_field(body, name):
+    fm = re.search(r'<strong>\s*' + re.escape(name) + r'[^<]*</strong>\s*([^<]+)', body, re.I)
+    return clean(fm.group(1)) if fm else None
+
+
+def parse_lancaster(page_html):
+    courses = []
+    for m in _LANCS.finditer(page_html):
+        code = m.group(1)
+        if not re.fullmatch(r'[A-Za-z0-9]{4}', code):
+            continue
+        label = clean(m.group(2))
+        body = m.group(3)
+        parts = [p.strip() for p in label.split(":")]
+        if len(parts) < 3:
+            continue
+        c = {"title": parts[0], "degree": parts[1], "ucasCode": code}
+        um = re.search(r'href="(/study/undergraduate/courses/[^"]+)"', body)
+        if um:
+            c["url"] = urllib.parse.urljoin(LANCASTER_URL, um.group(1))
+        al = _lancs_field(body, "Clearing A level grades") or _lancs_field(body, "A level")
+        bt = _lancs_field(body, "BTEC")
+        ib = _lancs_field(body, "IB") or _lancs_field(body, "International Baccalaureate")
+        if al:
+            c["aLevel"] = al
+        if bt:
+            c["btec"] = bt
+        if ib:
+            c["ib"] = ib
+        courses.append(c)
+    return courses
+
+
+# ---------------------------------------------------------------------------
+# Loughborough - landing page is a client-side Handlebars app, but it is fed by
+# a clean public JSON feed that ALSO carries a live per-course open/closed flag.
+# We fetch the JSON feed (not the HTML) and the "source" link shown to students
+# stays the human-facing /clearing page.
+# ---------------------------------------------------------------------------
+LOUGHBOROUGH_FEED = "https://clearing-data.lboro.ac.uk/courses/"
+LOUGHBOROUGH_PAGE = "https://www.lboro.ac.uk/clearing"
+
+
+def parse_loughborough(feed_text):
+    import json as _json
+    out = []
+    for c in _json.loads(feed_text):
+        title = (c.get("name") or "").strip()
+        if not title:
+            continue
+        ukeu = c.get("ukeu") or {}
+        rec = {"title": title,
+               "status": "open" if ukeu.get("status") == 1 else "closed"}
+        award = (c.get("award") or {}).get("name")
+        if award:
+            rec["degree"] = award
+        if c.get("ucas_code"):
+            rec["ucasCode"] = c["ucas_code"]
+        al = ukeu.get("a_level_grades") or ukeu.get("a_level_requirements")
+        if al:
+            rec["aLevel"] = str(al).strip()
+        if c.get("weblink"):
+            rec["url"] = c["weblink"]
+        out.append(rec)
+    return out
+
+
+# ---------------------------------------------------------------------------
 SITES = {
     "0082": {  # University of Lincoln - real per-course open/closed status
         "name": "University of Lincoln",
         "url": LINCOLN_URL,
         "parser": parse_lincoln,
+        "partial": False,
+        "partial_note": None,
+    },
+    "0132": {  # University College London
+        "name": "University College London",
+        "url": UCL_URL,
+        "parser": parse_ucl,
+        "partial": False,
+        "partial_note": None,
+    },
+    "0083": {  # University of Liverpool
+        "name": "University of Liverpool",
+        "url": LIVERPOOL_URL,
+        "source_url": "https://www.liverpool.ac.uk/clearing/",
+        "parser": parse_liverpool,
+        "partial": False,
+        "partial_note": None,
+    },
+    "0077": {  # University of Leeds
+        "name": "University of Leeds",
+        "url": LEEDS_URL,
+        "source_url": "https://www.leeds.ac.uk/clearing",
+        "parser": parse_leeds,
+        "partial": False,
+        "partial_note": None,
+    },
+    "0064": {  # Lancaster University
+        "name": "Lancaster University",
+        "url": LANCASTER_URL,
+        "source_url": "https://www.lancaster.ac.uk/study/clearing",
+        "parser": parse_lancaster,
+        "partial": False,
+        "partial_note": None,
+    },
+    "0089": {  # Loughborough University - via JSON feed (carries live status)
+        "name": "Loughborough University",
+        "url": LOUGHBOROUGH_FEED,
+        "source_url": LOUGHBOROUGH_PAGE,
+        "parser": parse_loughborough,
         "partial": False,
         "partial_note": None,
     },
@@ -251,7 +471,7 @@ def write_ddb(table_name, provider_code, site, courses, fetched_at):
     }
     expr_vals = {
         ":lc": courses, ":cnt": len(courses),
-        ":src": site["url"], ":at": fetched_at,
+        ":src": site.get("source_url") or site["url"], ":at": fetched_at,
         ":part": bool(site["partial"]),
     }
     set_parts = ["#lc = :lc", "#cnt = :cnt", "#src = :src",
