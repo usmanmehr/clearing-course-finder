@@ -3,6 +3,12 @@
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
+- Data correction (Clearing Day): King's College London (0072) marked clearingStatus
+  "Closed" after it was reported closed - it was seeded "Open" on 31 July and the
+  scraper never overwrites status, so it was stale. SearchCourses already skips
+  "Closed" universities, so KCL now drops out of results entirely. Updated in both
+  the live table (with a fresh lastVerified, possibleStatusChange cleared) and
+  seed.py. Reversible if KCL reopens.
 - Option B: the live Clearing course list now filters to the student's searched
   subject. When a course interest is given, each university's block shows only
   matching courses (opened by default) labelled "N of TOTAL matching '<subject>'";
