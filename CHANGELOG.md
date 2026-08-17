@@ -3,6 +3,12 @@
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
+- Docs: added AI-REBUILD-PROMPT.md - a single, self-contained specification an AI
+  agent can follow to recreate the entire project from scratch (purpose,
+  principles, tech stack, architecture, data model, all Lambdas + scripts,
+  Terraform layout + conventions, live-course ingestion + page-type taxonomy,
+  data flows, operational setup, roadmap, and a rebuild checklist). Account-
+  specific values kept as placeholders; safe for the public repo.
 - CI fix: the "Terraform fmt + validate" job was failing on main (red since the
   course-ingest module landed). `terraform validate` evaluates
   `source_code_hash = filebase64sha256(build/CourseIngest.zip)` for the CourseIngest
