@@ -3,6 +3,13 @@
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
+- CI fix: the "Terraform fmt + validate" job was failing on main (red since the
+  course-ingest module landed). `terraform validate` evaluates
+  `source_code_hash = filebase64sha256(build/CourseIngest.zip)` for the CourseIngest
+  Lambda (a single resource, unlike the for_each Node Lambdas which validate skips),
+  but `build/` is gitignored so the zip is absent in CI. Fixed by having the CI
+  terraform job run `scripts/build_lambdas.py` (stdlib-only) before fmt/validate, so
+  the zips exist. fmt/secret-scan/JS jobs were already green.
 - Off-season teardown (2026-08-17): ran `terraform destroy` to remove the entire
   2027 stack (0 resources remain) - not needed until the next cycle (~25 Jul 2027).
   Rebuild A-Z per HANDOVER.md: build_lambdas.py -> terraform apply -> seed.py ->
