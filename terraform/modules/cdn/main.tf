@@ -54,6 +54,10 @@ locals {
 # --- Site bucket (private; served via OAC) ---
 resource "aws_s3_bucket" "site" {
   bucket = local.site_bucket
+  # Seasonal, disposable stack: allow `terraform destroy` to empty and remove
+  # the bucket in one pass (no "BucketNotEmpty" blocker). Honours the standing
+  # requirement that destroy removes everything A-Z with no manual steps.
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_public_access_block" "site" {
@@ -72,6 +76,8 @@ resource "aws_kms_key" "exports" {
 
 resource "aws_s3_bucket" "exports" {
   bucket = local.exports_bucket
+  # See site bucket: force_destroy so teardown empties + removes it cleanly.
+  force_destroy = true
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "exports" {
