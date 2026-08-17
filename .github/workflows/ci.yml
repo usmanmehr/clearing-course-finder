@@ -20,6 +20,11 @@ jobs:
       - uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: "1.9.8"
+      - name: build lambda zips
+        # validate reads source_code_hash via filebase64sha256(build/*.zip); the
+        # single-resource CourseIngest Lambda is evaluated at validate time, so the
+        # zips must exist. build_lambdas.py is stdlib-only (python3 preinstalled).
+        run: python3 scripts/build_lambdas.py
       - name: fmt check
         run: terraform -chdir=terraform fmt -check -recursive
       - name: init (no backend, no creds)
