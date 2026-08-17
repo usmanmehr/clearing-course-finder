@@ -3,6 +3,16 @@
 All notable changes to this project are documented in this file.
 
 ## [Unreleased]
+- Off-season teardown (2026-08-17): ran `terraform destroy` to remove the entire
+  2027 stack (0 resources remain) - not needed until the next cycle (~25 Jul 2027).
+  Rebuild A-Z per HANDOVER.md: build_lambdas.py -> terraform apply -> seed.py ->
+  deploy_frontend.py. The shared mehrs.net Route53 zone, the live 2026 site, and
+  the Grafana box were untouched; the canary EIP was released (also retiring the
+  address that was exposed in git history).
+- Teardown fix: added `force_destroy = true` to the site and exports S3 buckets in
+  modules/cdn. Destroy had stalled on `BucketNotEmpty` (the site bucket still held
+  objects); force_destroy lets `terraform destroy` empty + remove them in one pass,
+  honouring the standing "destroy removes everything A-Z with no blockers" rule.
 - Docs: added HANDOVER.md - a next-cycle handover for a successor engineer
   (current state, how to operate, known issues/risks incl. the status-staleness
   #1 risk, prioritised roadmap led by the UCAS feed, the university page-type
